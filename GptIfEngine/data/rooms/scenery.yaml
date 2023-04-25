@@ -1,0 +1,79 @@
+taxi_people:
+  names:
+    - people.n.01
+    - social_group.n.01
+    - person.n.01
+  rooms:
+    - driving_to_terminal
+
+taxi_cruise_terminal:
+  names:
+    - facility.n.01
+  rooms:
+    - driving_to_terminal
+
+taxi_cityscape:
+  names:
+    - body_of_water.n.01
+  rooms:
+    - driving_to_terminal
+
+taxi_river:
+  names:
+    - cityscape.n.01
+    - structure.n.01
+    - way.n.06
+    - tract.n.01
+  rooms:
+    - driving_to_terminal
+
+taxi:
+  names:
+    - wheeled_vehicle.n.01
+    - vehicle.n.01
+  rooms:
+    - driving_to_terminal
+
+cruise_terminal_check_in_desk:
+  names:
+    - table.n.02
+  rooms:
+    - cruise_terminal
+
+cruise_terminal_security_area:
+  names:
+    - area.n.01
+  rooms:
+    - cruise_terminal
+
+cruise_terminal_chair:
+  names:
+    - seat.n.03
+    - seat.n.04
+  rooms:
+    - cruise_terminal
+
+cruise_terminal_lounge:
+  names:
+    - room.n.01
+  rooms:
+    - cruise_terminal
+
+cruise_terminal_tv:
+  names:
+    - television.n.01
+  rooms:
+    - cruise_terminal
+
+gangway_passengers:
+  names:
+    - traveler.n.01
+  rooms:
+    - gangway
+
+gangway_gangway:
+  names:
+    - bridge.n.01
+    - way.n.06
+  rooms:
+    - gangway

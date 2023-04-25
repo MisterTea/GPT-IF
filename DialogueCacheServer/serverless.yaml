@@ -1,0 +1,27 @@
+service: gptif-magnum
+frameworkVersion: '3'
+
+package:
+  patterns:
+    - "!venv/**"
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+  stage: ${opt:stage, "dev"}
+  environment:
+    LOG_LEVEL: ${opt:loglevel, 'DEBUG'}
+
+functions:
+  api:
+    handler: gptif.dialogue_cache_server_magnum.handler
+    events:
+      - httpApi: '*'
+
+plugins:
+  - serverless-python-requirements

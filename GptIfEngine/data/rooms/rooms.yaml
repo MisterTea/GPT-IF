@@ -1,0 +1,27 @@
+driving_to_terminal:
+  title: Driving to the Cruise Terminal
+
+cruise_terminal:
+  title: The Cruise Terminal
+  actions:
+  exits:
+    north:
+      room: gangway
+      prescript: |
+        {% if world.check_can_board_ship() %}True{% else %}False{% endif %}
+
+gangway:
+  title: Cruise Terminal Gangway
+  exits:
+    north:
+      room: atrium
+      postscript: |
+        {{ world.start_ch2() }}
+    south:
+      room: cruise_terminal
+
+atrium:
+  title: The Fortuna Atrium
+
+treading_water:
+  title: Treading water in the Gulf of Mexico

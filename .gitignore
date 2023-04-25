@@ -1,3 +1,10 @@
+node_modules
+.serverless
+.env
+.vscode
+gpt_models
+koala-13B-4bit-128g.GGML.bin
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -1,0 +1,12 @@
+ship:
+  clue: I have a deck, but no cards.
+  solution: ship
+ocean:
+  clue: I am always moving, but never get anywhere.
+  solution: ocean
+helm:
+  clue: Not a headpiece, but I am the Captain's guide. Not a rudder, but I steer the boat aside.
+  solution: helm
+icebox:
+  clue: A cold, white chest with a door that keeps food fresh.
+  solution: icebox

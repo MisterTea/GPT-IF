@@ -1,0 +1,12 @@
+Answer questions about the following statement:
+
+"What is a quark?"
+
+Does the question above end in a question mark?
+Yes
+
+Does the question above ask about Einstein?
+No
+
+Is the question above about the military?
+
