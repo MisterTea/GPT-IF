@@ -99,7 +99,11 @@ def play(debug: bool, converse_server: Optional[str], sql_url: Optional[str]):
                     console.print("[blue]Thanks for playing![/]")
                     return
 
-                if verb not in DIRECTION_VERBS and len(verb_classes) == 0:
+                if (
+                    verb not in DIRECTION_VERBS
+                    and verb != "L"
+                    and len(verb_classes) == 0
+                ):
                     console.warning(
                         f"Sorry, I don't understand the verb {verb}. Remember that each sentence must begin with an action verb."
                     )
@@ -121,7 +125,7 @@ def play(debug: bool, converse_server: Optional[str], sql_url: Optional[str]):
                     if direction in DIRECTION_SHORT_LONG_MAP.keys():
                         direction = DIRECTION_SHORT_LONG_MAP[direction]
                     world.go(direction)
-                elif "30" in verb_classes:  # Look
+                elif "L" == verb or "30" in verb_classes:  # Look
                     if len(command_minus_verb) == 0:
                         world.look()
                         world.step()
@@ -137,6 +141,7 @@ def play(debug: bool, converse_server: Optional[str], sql_url: Optional[str]):
                         except ParseException as pe:
                             console.warning(pe)
                 elif verb == "WAIT":  # Wait
+                    console.print("Time passes...\n", style="yellow")
                     world.step()
                 elif "37" in verb_classes:  # Tell/Ask
                     # Handle speaking
@@ -154,9 +159,7 @@ def play(debug: bool, converse_server: Optional[str], sql_url: Optional[str]):
                     target_agent = None
                     missing_target_agent = None
                     for agent_id, agent in world.agents.items():
-                        if target_name.lower() in [
-                            x.lower() for x in agent.profile.names
-                        ]:
+                        if target_name.lower() in [x.lower() for x in agent.names]:
                             if (
                                 agent_id in world.active_agents
                                 and agent.room_id == world.current_room_id
@@ -201,7 +204,7 @@ def play(debug: bool, converse_server: Optional[str], sql_url: Optional[str]):
                                                 Markdown(
                                                     """```You made your first friend!
 
-When a character becomes your friend, they will give you permission to do things that you couldn't before.```"""
+When a character becomes your friend, you can PERSUADE them to do something that they wouldn't do for a stranger.  Go ahead and try it: type PERSUADE DERRICK.```"""
                                                 )
                                             )
                                     else:
@@ -221,6 +224,32 @@ When a character becomes your friend, they will give you permission to do things
                                             )
 
                             world.step()
+                elif "58" in verb_classes:  # PERSUADE
+                    target_name = command_minus_verb
+
+                    target_agent = None
+                    missing_target_agent = None
+                    for agent_id, agent in world.agents.items():
+                        if target_name.lower() in [x.lower() for x in agent.names]:
+                            if (
+                                agent_id in world.active_agents
+                                and agent.room_id == world.current_room_id
+                            ):
+                                target_agent = agent
+                            missing_target_agent = agent
+
+                    if target_agent is None:
+                        if missing_target_agent is not None:
+                            console.print(
+                                f"{missing_target_agent.profile.name} is not nearby."
+                            )
+                        else:
+                            console.warning(
+                                f"Sorry, I don't know who {target_name} is."
+                            )
+                    else:
+                        world.persuade(target_agent)
+
                 else:
                     direct_object = get_direct_object(command)
                     if world.act_on(verb, direct_object):

@@ -77,3 +77,10 @@ gangway_gangway:
     - way.n.06
   rooms:
     - gangway
+
+atrium_fountain:
+  names:
+    - plumbing_fixture.n.01
+    - fountain.n.01
+  rooms:
+    - atrium

@@ -131,3 +131,13 @@ The gangway to the cruise ship is abuzz with activity. Passengers of all ages an
 There are young families with small children, couples on their honeymoon, and groups of friends celebrating a special occasion. Some passengers are dressed in casual clothes, while others are dressed in more formal attire. There are people from all over the world, speaking a variety of languages.
 
 The atmosphere is festive and excited. Everyone is looking forward to the journey ahead. As you walk up the gangway, you can feel the excitement in the air. You can smell the ocean and hear the waves crashing against the hull of the ship. You can see the sun shining brightly and the white clouds floating in the sky.
+
+# atrium_fountain
+
+## look
+
+You step into the grand atrium of the cruise ship, and you are immediately struck by the beauty of the fountain. It is a large, circular fountain, with a central column that rises up to the ceiling. The column is surrounded by four smaller columns, each of which is topped with a cherub. The cherubs are blowing water out of their mouths, and the water cascades down the columns, creating a beautiful waterfall effect.
+
+The fountain is surrounded by a walkway, and you can walk around it to get a closer look. The water is clear and blue, and you can see fish swimming around in it. The fountain is also surrounded by flowers, which add to its beauty.
+
+You stand for a moment, enjoying the peace and tranquility of the fountain. It is a welcome respite from the hustle and bustle of the ship. You take a deep breath of the fresh air, and you feel your stress start to melt away.

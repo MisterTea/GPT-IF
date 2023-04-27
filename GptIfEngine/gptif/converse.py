@@ -117,9 +117,9 @@ def converse(target_agent: Agent, statement: str) -> Optional[str]:
 **Age:** {target_agent.profile.age}
 **Gender:** {target_agent.profile.gender}
 **Occupation:** {target_agent.profile.occupation}
-**Personality:** {target_agent.profile.personality}
-**Backstory:** {target_agent.profile.backstory}
-**Goals:**   {target_agent.profile.goals}
+**Personality:** {". ".join(target_agent.profile.personality)}
+**Backstory:** {". ".join(target_agent.profile.backstory)}
+**Goals:**   {". ".join(target_agent.profile.goals)}
 
 Jason: What is your name?
 {target_agent.profile.name}: \"My name is {target_agent.profile.name}.\"
@@ -189,9 +189,12 @@ No
         if cached_answer is not None:
             if "yes" in cached_answer.lower():
                 return True
+            else:
+                assert "no" in cached_answer.lower(), cached_answer
+                return False
         console.print(f"[purple]{target_agent.profile.name} thinks for a moment...[/]")
         while True:
-            answer = llm(context, max_tokens=1500, stop=["?"], echo=False)
+            answer = llm(context, max_tokens=1500, stop=["?", "\n\n"], echo=False)
             answer_text = answer["choices"][0]["text"]  # type: ignore
             console.debug("RAW ANSWER", answer_text)
             if "yes" in answer_text.lower():

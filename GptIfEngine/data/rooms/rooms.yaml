@@ -3,25 +3,142 @@ driving_to_terminal:
 
 cruise_terminal:
   title: The Cruise Terminal
-  actions:
   exits:
     north:
       room: gangway
       prescript: |
-        {% if world.check_can_board_ship() %}True{% else %}False{% endif %}
+        {% if world.check_can_board_ship() %}%%True%%{% else %}%%False%%{% endif %}
 
 gangway:
   title: Cruise Terminal Gangway
   exits:
     north:
       room: atrium
-      postscript: |
-        {{ world.start_ch2() }}
+      prescript: |
+        %%{{ world.start_ch2() }}%%%%True%%
     south:
       room: cruise_terminal
 
 atrium:
-  title: The Fortuna Atrium
+  title: The Fortuna Atrium (Deck 4)
+  exits:
+    up:
+      room: stateroom_deck
+      prescript: You climb up several flights of stairs.
+    down:
+      room: promenade
+
+promenade:
+  title: Promenade (Deck 3)
+  exits:
+    north:
+      room: theater
+    up:
+      room: atrium
+    down:
+      room: medical_and_crew
+
+theater:
+  title: The Fortuna Theater
+  exits:
+    south:
+      room: promenade
+
+stateroom_deck:
+  title: The VIP Stateroom Deck (Deck 8)
+  exits:
+    down:
+      room: atrium
+      prescript: You hustle down several flights of stairs, careful not to fall over.
+    west:
+      room: my_stateroom
+    up:
+      room: pool_deck
+      prescript: A blast of windy, open air assaults you as the automatic doors slide open.
+
+pool_deck:
+  title: The Pool Deck (Deck 9)
+  exits:
+    down:
+      room: stateroom_deck
+    up:
+      room: vip_lounge
+      prescript: |
+        {% if "my_stateroom" not in world.visited_rooms %}
+        You start to head to the VIP safety drill, but then remember that this may be the last time in a while that you will be able to check out your new room!  You simply **must** visit your stateroom first.%%False%%
+        {% else %}
+        %%True%%
+        {% if world.on_chapter == 2 %}%%{{world.start_ch3()}}%%{% endif %}{% endif %}
+    north:
+      room: gym
+
+gym:
+  title: Gym
+  exits:
+    south:
+      room: pool_deck
+    west:
+      room: gym_locker_room
+
+gym_locker_room:
+  title: Gym Locker Room
+  exits:
+    east:
+      room: gym
+
+my_stateroom:
+  title: "My VIP Stateroom"
+  exits:
+    east:
+      room: stateroom_deck
+
+vip_lounge:
+  title: VIP Lounge
+  exits:
+    down:
+      room: pool_deck
+
+medical_and_crew:
+  title: "Medical and Crew Quarters (Deck 2)"
+  exits:
+    north:
+      room: mess_hall_hallway
+      prescript: |
+        {% if world.on_chapter < 4 %}
+        %%False%%The door to the mess hall requires a keycard.  Only crew members are allowed through.
+        {% else %}
+        %%True%%
+        {% endif %}
+    west:
+      room: medical
+    down:
+      room: engine_room
+      prescript: |
+        {% if world.wearing_uniform == False %}
+        %%False%%A steel door blocks your path.  Only engine crew and ship officers are allowed past that point.
+        {% else %}
+        %%True%%
+        {% endif %}
+    up:
+      room: promenade
+
+medical:
+  title: "Medical and Morgue"
+  exits:
+    east:
+      room: medical_and_crew
+
+mess_hall_hallway:
+  title: Mess Hall Hallway
+  exits:
+    south:
+      room: medical_and_crew
+
+engine_room:
+  title: Engine Room (Deck 1)
+  exits:
+    up:
+      room: medical_and_crew
 
 treading_water:
   title: Treading water in the Gulf of Mexico
