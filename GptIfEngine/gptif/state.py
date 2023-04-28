@@ -351,8 +351,11 @@ After a few moments, the short conversation is over and June turns back to face 
         if self.current_room_id == agent.room_id:
             console.print(f"{agent.name} walks in.")
 
-    def move_agent(self, agent: Agent, room: Room):
-        agent.room_id = room.uid
+    def move_agent(self, agent: Agent, room: Optional[Room]):
+        if room is None:
+            agent.room_id = None
+        else:
+            agent.room_id = room.uid
 
     def look(self):
         console.print(self.current_room.title, style="yellow bold")

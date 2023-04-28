@@ -40,7 +40,7 @@ June walks over to you and puts an arm around your shoulder, then whispers in yo
 
 **June Hope (whispering):** I spoke with Captain John, and your tab is on us. We will cover any expenses you incur on this cruise. Please have a drink on us to calm your nerves.
 
-And with that, folks begin to disperse. You make your way back to the atrium, where your cruise started. But, the carefree sense of joy that you had when you first entered the atrium is lost. You have less than twenty four hours to live.
+And with that, folks begin to disperse. You make your way back to the atrium, where your cruise started. But, the carefree sense of joy that you had when you first entered the atrium is lost. You wonder how many moments you have to live.
 
 {{ world.ask_to_press_key() }}
 

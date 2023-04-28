@@ -150,7 +150,7 @@ An unexpected laugh causes Nancy Smith to spit a partial mouthful of vodka sour 
 
 {{ world.ask_to_press_key() }}
 
-**James Carrington:** Some of you are here because of your brilliance, your charm, your passion. SOme of you are here because I owe you a lot of money.
+**James Carrington:** Some of you are here because of your brilliance, your charm, your passion. Some of you are here because I owe you a lot of money.
 
 James chuckles and raises a toast. Then, James' eyes land on you. He stares directly into your soul. You are both inspired and terrified.
 
@@ -176,6 +176,10 @@ James pulls out his cell phone and begins speaking to someone. After a few momen
 
 With that, James exits down the stairs in a calculated hurry.
 
+{{ world.send_agent(world.agents["financier"], "down") }}
+
+{{ world.move_agent(world.agents["financier"], None) }}
+
 {{ world.ask_to_press_key() }}
 
 **June Hope:** Alright, ladies and gentlemen! The tour will commence in a few moments. We will be visiting parts of the ship that few guests have ever seen, so I am asking everyone to stick together. Also, this is the first and last part of the tour where you can say 'hi' to our knowledgeable and compassionate captain, Captain John!
@@ -188,7 +192,7 @@ Captain John gives everyone a wave and marches off to a less ceremonial, and pro
 
 {{ world.send_agent(world.agents["captain"], "down") }}
 
-{{ world.move_agent(world.agents["captain"], world.rooms["mess_hall_hallway"])}}
+{{ world.move_agent(world.agents["captain"], None) }}
 
 **June Hope:** Ladies and gentleman, grab your food and beverages and get ready. We will depart momentarily.
 

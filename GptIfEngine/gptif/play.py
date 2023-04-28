@@ -75,6 +75,7 @@ def play(debug: bool, no_converse_server: bool, sql_url: Optional[str]):
         gptif.converse.RUN_LOCALLY = False
         gptif.converse.CONVERSE_SERVER = (
             "https://i00ny5xb4e.execute-api.us-east-1.amazonaws.com"
+            # "http://localhost:8000"
         )
 
     create_db_and_tables()
@@ -97,11 +98,18 @@ def play(debug: bool, no_converse_server: bool, sql_url: Optional[str]):
                 if len(command) == 0:
                     continue
                 verb = command.split(" ")[0].upper()
+                command_minus_verb = " ".join(command.split(" ")[1:])
                 verb_classes = get_verb_classes(verb)
                 if verb == "EXIT" or verb == "QUIT" or verb == "Q":
-                    console.print()
-                    console.print("[blue]Thanks for playing![/]")
-                    return
+                    if len(command_minus_verb) > 0:
+                        console.warning(
+                            'Type "EXIT" with no arguments to leave the game'
+                        )
+                        continue
+                    else:
+                        console.print()
+                        console.print("[blue]Thanks for playing![/]")
+                        return
 
                 if (
                     verb not in DIRECTION_VERBS
@@ -112,12 +120,11 @@ def play(debug: bool, no_converse_server: bool, sql_url: Optional[str]):
                         f"Sorry, I don't understand the verb {verb}. Remember that each sentence must begin with an action verb."
                     )
                     continue
-                command_minus_verb = " ".join(command.split(" ")[1:])
                 if verb in DIRECTION_VERBS or "51" in verb_classes:  # Go
                     if verb in DIRECTION_VERBS:
                         direction = verb
                     else:
-                        direction = command_minus_verb
+                        direction = command_minus_verb.upper().strip()
                         if direction not in DIRECTION_VERBS:
                             if len(direction) == 0:
                                 console.warning(
@@ -206,9 +213,7 @@ def play(debug: bool, no_converse_server: bool, sql_url: Optional[str]):
                                         if target_agent.uid == "port_security_officer":
                                             console.print(
                                                 Markdown(
-                                                    """```You made your first friend!
-
-When a character becomes your friend, you can PERSUADE them to do something that they wouldn't do for a stranger.  Go ahead and try it: type PERSUADE DERRICK.```"""
+                                                    """```You made your first friend! When a character becomes your friend, you can PERSUADE them to do something that they wouldn't do for a stranger.  Go ahead and try it: type PERSUADE DERRICK.```"""
                                                 )
                                             )
                                     else:
@@ -253,13 +258,19 @@ When a character becomes your friend, you can PERSUADE them to do something that
                             )
                     else:
                         world.persuade(target_agent)
-
+                elif verb.lower() == "help":
+                    console.print("TODO: HELP")
                 else:
-                    direct_object = get_direct_object(command)
-                    if world.act_on(verb, direct_object):
-                        world.step()
-                    else:
-                        console.warning(f"Could not find a {direct_object} to {verb}")
+                    try:
+                        direct_object = get_direct_object(command)
+                        if world.act_on(verb, direct_object):
+                            world.step()
+                        else:
+                            console.warning(
+                                f"Could not find a {direct_object} to {verb}"
+                            )
+                    except ParseException as pe:
+                        console.warning(pe)
             while world.waiting_for_player is False:
                 world.step()
 

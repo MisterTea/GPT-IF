@@ -27,4 +27,4 @@ RUN python -m gptif.parser
 
 COPY data data
 
-ENTRYPOINT [ "python", "-m", "gptif.play", "--converse-server=https://i00ny5xb4e.execute-api.us-east-1.amazonaws.com" ]
+ENTRYPOINT [ "python", "-m", "gptif.play" ]

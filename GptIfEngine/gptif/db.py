@@ -44,6 +44,7 @@ def get_answer_if_cached(dialogue: GptDialogue) -> Optional[str]:
             .where(GptDialogue.model_version == dialogue.model_version)
             .where(GptDialogue.question == dialogue.question)
             .where(GptDialogue.context == dialogue.context)
+            .where(GptDialogue.stop_words == dialogue.stop_words)
         )
         results = list(session.exec(statement))
         if len(results) == 0:

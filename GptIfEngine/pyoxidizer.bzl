@@ -90,7 +90,7 @@ def make_exe():
     # policy.resources_location = "in-memory"
 
     # Use filesystem-relative location for adding resources by default.
-    policy.resources_location = "filesystem-relative:prefix"
+    policy.resources_location = "filesystem-relative:lib"
 
     # Attempt to add resources relative to the built binary when
     # `resources_location` fails.
@@ -109,7 +109,7 @@ def make_exe():
 
     # Configure policy values to handle files as files and not attempt
     # to classify files as specific types.
-    # policy.set_resource_handling_mode("files")
+    policy.set_resource_handling_mode("files")
 
     # This variable defines the configuration of the embedded Python
     # interpreter. By default, the interpreter will run a Python REPL
@@ -126,7 +126,7 @@ def make_exe():
 
     # Set initial value for `sys.path`. If the string `$ORIGIN` exists in
     # a value, it will be expanded to the directory of the built executable.
-    # python_config.module_search_paths = ["$ORIGIN/lib"]
+    python_config.module_search_paths = ["$ORIGIN/lib"]
 
     # Use jemalloc as Python's memory allocator.
     # python_config.allocator_backend = "jemalloc"
@@ -247,22 +247,24 @@ def make_exe():
     # attributes.
     #exe.add_python_resources(exe.pip_install(["appdirs"]))
 
+    exe.add_python_resources(exe.pip_install(["."]))
+
     # Invoke `pip install` using a requirements file and add the collected resources
     # to our binary.
-    #exe.add_python_resources(exe.pip_install(["-r", "requirements.txt"]))
+    exe.add_python_resources(exe.pip_install(["-r", "requirements.txt"]))
 
 
     # Read Python files from a local directory and add them to our embedded
     # context, taking just the resources belonging to the `foo` and `bar`
     # Python packages.
-    exe.add_python_resources(exe.read_package_root(
-        path=".",
-        packages=["gptif"],
-    ))
+    #exe.add_python_resources(exe.read_package_root(
+        #path=".",
+        #packages=["gptif"],
+    #))
 
     # Discover Python files from a virtualenv and add them to our embedded
     # context.
-    exe.add_python_resources(exe.read_virtualenv(path="venv"))
+    #exe.add_python_resources(exe.read_virtualenv(path="venv"))
 
     # Filter all resources collected so far through a filter of names
     # in a file.

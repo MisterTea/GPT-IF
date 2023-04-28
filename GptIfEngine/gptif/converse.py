@@ -22,10 +22,11 @@ def get_answer_from_cache(dialogue: db.GptDialogue) -> Optional[str]:
             CONVERSE_SERVER + "/fetch_dialogue", json=dialogue.dict()
         )
 
-        # TODO: More gracefully handle errors
-        assert response.status_code == 200
         console.debug("RESPONSE", response)
         console.debug(response.content)
+
+        # TODO: More gracefully handle errors
+        assert response.status_code == 200
 
         x = response.content.decode()
         if x == "None" or x == '"None"':
@@ -67,11 +68,12 @@ def converse(target_agent: Agent, statement: str) -> Optional[str]:
 **Personality:** {". ".join(target_agent.profile.personality)}
 **Backstory:** {". ".join(target_agent.profile.backstory)}
 **Goals:**   {". ".join(target_agent.profile.goals)}
+**Notes:**   {". ".join(target_agent.notes)}
 
-Jason: What is your name?
+Alfred: What is your name?
 {target_agent.profile.name}: \"My name is {target_agent.profile.name}.\"
 
-Jason: {statement}
+Alfred: {statement}
 {target_agent.profile.name}: \""""
 
     assert target_agent.profile.name is not None
@@ -81,7 +83,7 @@ Jason: {statement}
         model_version=llm.model_name(),
         question=statement,
         context=context,
-        stop_words=",".join(["Jason:", "\n"]),
+        stop_words=",".join(["Alfred:", "\n"]),
     )
 
     assert dialogue.stop_words is not None

@@ -1,0 +1,8 @@
+skip person's name when just one person
+
+Add "people here" section
+Add quest line above room title
+tab completion
+
+Longer form back-and-forth dialogue
+Ask player to put in their name

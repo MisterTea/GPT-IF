@@ -68,7 +68,7 @@ taxi_driver:
     - to help people explore the Tampa Bay area
     - to make a difference in the lives of others
     notes:
-    - Juan is driving Jason to a cruise terminal.
+    - Juan is driving Alfred to a cruise terminal.
 
   Tics:
     percent_increase_per_tick: 100d1

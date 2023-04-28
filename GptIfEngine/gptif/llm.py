@@ -2,15 +2,8 @@ import multiprocessing
 import os
 from typing import List, Optional
 
-import openai
 import requests
-from llama_cpp import Llama
 from rich.progress import Progress
-
-from gptif import db
-from gptif.console import console
-from gptif.state import Agent
-from gptif.world import world
 
 
 class LargeLanguageModel:
@@ -43,6 +36,8 @@ class LlamaCppLanguageModel:
                 download_file(
                     f"https://huggingface.co/TheBloke/koala-13B-GPTQ-4bit-128g-GGML/resolve/main/{self.model_name()}"
                 )
+            from llama_cpp import Llama
+
             self.llm_model = Llama(
                 model_path=model_path,
                 n_ctx=2048,
@@ -56,12 +51,16 @@ class LlamaCppLanguageModel:
 
 class OpenAiLanguageModel:
     def __init__(self):
-        openai.api_key = os.getenv("OPENAI_API_KEY")
+        pass
 
     def model_name(self):
         return "gpt-3.5-turbo"
 
     def llm(self, question: str, stop: List[str] = [], echo: bool = False) -> str:
+        import openai
+
+        openai.api_key = os.getenv("OPENAI_API_KEY")
+
         response = openai.ChatCompletion.create(
             model=self.model_name(),
             messages=[
