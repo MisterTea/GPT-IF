@@ -1,7 +1,11 @@
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()  # take environment variables from .env.
+
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 from gptif.db import (
     GptDialogue,
@@ -9,13 +13,14 @@ from gptif.db import (
     get_answer_if_cached,
     put_answer_in_cache,
 )
-from fastapi import FastAPI
-from pydantic import BaseModel
+from gptif.llm import LlamaCppLanguageModel, OpenAiLanguageModel
 
 stage = os.environ.get("STAGE", None)
 root_path = f"/{stage}" if stage else "/"
 
 app = FastAPI(title="MyAwesomeApp", root_path=root_path)
+
+openai_model = OpenAiLanguageModel()
 
 
 @app.on_event("startup")
@@ -26,6 +31,16 @@ def on_startup():
 @app.post("/fetch_dialogue")
 async def fetch_dialogue(query: GptDialogue) -> str:
     answer = get_answer_if_cached(query)
+    if answer is None and query.model_version == openai_model.model_name():
+        # Grab the answer from openai
+        assert query.stop_words is not None
+        answer = openai_model.llm(
+            query.context, stop=query.stop_words.split(","), echo=False
+        )
+        query.answer = answer
+        put_answer_in_cache(query)
+        return answer
+
     return "None" if answer is None else answer
 
 

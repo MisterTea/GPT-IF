@@ -80,6 +80,8 @@ DEBUG_INPUT = [
     "wait",
 ]
 
+DEBUG_MODE = True
+
 
 class ConsoleHandler:
     def __init__(self):
@@ -106,7 +108,9 @@ class ConsoleHandler:
         return self.console.input(prompt)
 
     def debug(self, *objects: Any):
-        self.console.print(*objects, style="bright_black on black")
+        global DEBUG_MODE
+        if DEBUG_MODE is True:
+            self.console.print(*objects, style="bright_black on black")
 
     def warning(self, *objects: Any):
         self.console.print(*objects, style="red on black")

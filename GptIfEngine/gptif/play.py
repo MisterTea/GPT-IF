@@ -1,22 +1,23 @@
 import os
-
 from typing import Optional
+
 from dotenv import load_dotenv
 
 load_dotenv()  # take environment variables from .env.
 
 import click
+from rich.markdown import Markdown
+
+from gptif.console import console
 from gptif.converse import check_if_more_friendly, converse
 from gptif.db import create_db_and_tables
 from gptif.parser import (
+    ParseException,
     get_direct_object,
     get_verb_classes,
     handle_user_input,
-    ParseException,
 )
-from gptif.console import console
 from gptif.world import world
-from rich.markdown import Markdown
 
 
 class DummyContext(object):
@@ -54,9 +55,9 @@ DIRECTION_SHORT_LONG_MAP = {
 
 @click.command()
 @click.option("--debug", default=False, is_flag=True)
-@click.option("--converse-server", default=None)
+@click.option("--no-converse-server", default=False, is_flag=True)
 @click.option("--sql-url", default=None)
-def play(debug: bool, converse_server: Optional[str], sql_url: Optional[str]):
+def play(debug: bool, no_converse_server: bool, sql_url: Optional[str]):
     if sql_url is not None:
         os.environ["SQL_URL"] = sql_url
     elif "SQL_URL" not in os.environ:
@@ -66,12 +67,15 @@ def play(debug: bool, converse_server: Optional[str], sql_url: Optional[str]):
         import gptif.console
 
         gptif.console.DEBUG_INPUT.clear()
+        gptif.console.DEBUG_MODE = False
 
-    if converse_server is not None:
+    if no_converse_server == False:
         import gptif.converse
 
         gptif.converse.RUN_LOCALLY = False
-        gptif.converse.CONVERSE_SERVER = converse_server
+        gptif.converse.CONVERSE_SERVER = (
+            "https://i00ny5xb4e.execute-api.us-east-1.amazonaws.com"
+        )
 
     create_db_and_tables()
 

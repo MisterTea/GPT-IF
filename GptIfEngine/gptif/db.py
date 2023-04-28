@@ -1,7 +1,8 @@
-from typing import Optional
 import os
-from sqlmodel import Field, SQLModel, create_engine
+from typing import List, Optional
+
 from sqlmodel import Field, Session, SQLModel, create_engine, select
+
 from gptif.console import console
 
 engine = None
@@ -14,6 +15,7 @@ class GptDialogue(SQLModel, table=True):
     question: str = Field(index=True)
     context: str = Field(index=True)
     answer: Optional[str] = Field(default=None, nullable=False)
+    stop_words: Optional[str] = Field(default=None)
 
 
 def create_db_and_tables():
