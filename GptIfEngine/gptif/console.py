@@ -1,6 +1,5 @@
-import readline  # typing: ignore
-
 from typing import Any, Optional
+
 from rich.console import Console
 
 DEBUG_INPUT = [
