@@ -15,6 +15,11 @@ import gptif.console
 from rich.markdown import Markdown
 from rich.console import Console
 
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader, Dumper
+
 from gptif.parser import get_hypernyms_set, get_verb_classes, get_verb_classes_for_list
 
 
@@ -161,6 +166,8 @@ class World:
     time_in_chapter: int = 0
     wearing_uniform: bool = False
 
+    version: int = 1
+
     def __post_init__(self):
         global world
         world = self
@@ -242,6 +249,25 @@ class World:
                 self.agents[agent_uid] = Agent.load_yaml(agent_uid, agent_yaml)
 
         pass
+
+    def save(self):
+        saved_world = yaml.dump(self, Dumper=Dumper)
+        return saved_world
+
+    def load(self, yaml_text):
+        world = yaml.load(yaml_text, Loader=Loader)
+        return world
+
+    def upgrade(self, newer_world: World):
+        if self.version != newer_world.version:
+            raise Exception("Can't load the saved game from a different version")
+        # Not implemented
+        # self.rooms = newer_world.rooms
+        # for agent_uid in newer_world.agents.keys():
+        #     if agent_uid not in self.agents:
+        #         self.agents[agent_uid] = newer_world.agents[agent_uid]
+        #     else:
+        #         self.agents[agent_uid].upgrade(newer_world.agents[agent_uid])
 
     def ask_to_press_key(self):
         if len(gptif.console.DEBUG_INPUT) > 0:
@@ -393,6 +419,7 @@ After a few moments, the short conversation is over and June turns back to face 
             )
 
     def print_header(self):
+        self.print_goal()
         console.print(self.current_room.title, style="yellow bold")
 
     def print_footer(self):

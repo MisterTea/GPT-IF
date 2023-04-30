@@ -18,7 +18,7 @@ The officer is having a harder time speaking. It's clear he only has moments lef
 
 All of the color drains from your face. You can't help but look around the room, expecting someone to run into the restroom from anywhere and explain how this has all been an elaborate prank. The door to the restroom remains closed.
 
-**Officer Schooner:** ...please, for me... Go to the gym. Officers always leave their clothes and ID cards in lockers without locking them. Go to the engine room. The terrorist has dark...
+**Officer Schooner:** ...please, for me... Go to the gym. Officers always leave their ID cards in lockers without locking them. Go to the engine room. The terrorist has dark...
 
 The officer begins convulsing. Spit forming at his mouth starts to resemble foam as he utters his last breath. Officer Schooner is no more.
 

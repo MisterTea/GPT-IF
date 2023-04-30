@@ -17,7 +17,8 @@ from gptif.parser import (
     get_verb_classes,
     handle_user_input,
 )
-from gptif.world import world
+from gptif.world import world, World
+import random
 
 
 class DummyContext(object):
@@ -67,20 +68,19 @@ def play(
     converse_server_url: str,
     sql_url: Optional[str],
 ):
+    import gptif.console
+    import gptif.converse
+
     if sql_url is not None:
         os.environ["SQL_URL"] = sql_url
     elif "SQL_URL" not in os.environ:
         os.environ["SQL_URL"] = "sqlite:///~/.gptif"
 
     if not debug:
-        import gptif.console
-
         gptif.console.DEBUG_INPUT.clear()
         gptif.console.DEBUG_MODE = False
 
     if no_converse_server == False:
-        import gptif.converse
-
         gptif.converse.RUN_LOCALLY = False
         gptif.converse.CONVERSE_SERVER = converse_server_url
 
@@ -91,6 +91,14 @@ def play(
 
         while True:
             while world.waiting_for_player is True:
+                if gptif.console.DEBUG_MODE and random.random() > 0.1:
+                    serialized_world = world.save()
+                    import gptif.world
+
+                    saved_world = World.load(serialized_world)
+                    gptif.world.world.upgrade(saved_world)
+                    gptif.world.world = saved_world
+
                 try:
                     command = console.get_input(">").strip()
                 except KeyboardInterrupt as ki:
