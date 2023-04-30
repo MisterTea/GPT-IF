@@ -9,6 +9,7 @@ from enum import IntEnum
 import yaml
 from md2py import md2py, TreeOfContents
 import jinja2
+from gptif.cl_image import display_image_for_prompt
 from gptif.console import console
 import gptif.console
 from rich.markdown import Markdown
@@ -358,14 +359,41 @@ After a few moments, the short conversation is over and June turns back to face 
             agent.room_id = room.uid
 
     def look(self):
-        console.print(self.current_room.title, style="yellow bold")
+        self.print_header()
         self.play_sections(self.current_room.descriptions["Long"], style="yellow")
+        display_image_for_prompt(self.current_room.descriptions["Long"][0])
         self.print_footer()
 
     def look_quickly(self):
-        console.print(self.current_room.title, style="yellow bold")
+        self.print_header()
         self.play_sections(self.current_room.descriptions["Short"], style="yellow")
         self.print_footer()
+
+    @property
+    def current_quest(self) -> Optional[str]:
+        if self.on_chapter == 1:
+            return "Waiting to arrive at the cruise terminal."
+        if self.on_chapter == 2:
+            if "my_stateroom" not in world.visited_rooms:
+                return "Exploring the Fortuna"
+            elif world.current_room_id != "vip_lounge":
+                return "Making my way to the VIP Room"
+            else:
+                return "Chatting with other VIPs"
+        if self.on_chapter < 5:
+            return "Looking around and chatting on the VIP Tour."
+        if self.on_chapter == 5:
+            return "Looking for an officer keycard"
+        return None
+
+    def print_goal(self):
+        if self.current_quest is not None:
+            console.print(
+                "Your current goal is: " + self.current_quest, style="bright_blue bold"
+            )
+
+    def print_header(self):
+        console.print(self.current_room.title, style="yellow bold")
 
     def print_footer(self):
         self.print_agents()
@@ -390,11 +418,11 @@ After a few moments, the short conversation is over and June turns back to face 
 
     def print_agents(self):
         agent_text = [
-            f"{agent.name} is standing here.  " for agent in self.agents_in_room
+            f"* {agent.name} is standing here.  " for agent in self.agents_in_room
         ]
         if len(agent_text) == 0:
             return
-        console.print(Markdown("\n".join(agent_text)))
+        console.print(Markdown("""**People Here:**\n""" + "\n".join(agent_text)))
         console.print()
 
     def act_on(self, verb: str, look_object: str) -> bool:
@@ -406,16 +434,19 @@ After a few moments, the short conversation is over and June turns back to face 
                 or len(scenery.names.intersection(hypernyms_set)) > 0
             ):
                 # Got a match
-                if (
-                    verb.lower() in scenery.actions
-                    or len(
-                        get_verb_classes(verb.lower()).intersection(
-                            get_verb_classes_for_list(scenery.actions.keys())
-                        )
-                    )
-                    > 0
-                ):
-                    self.play_sections(scenery.actions[verb.lower()], "yellow")
+                scenery_action = None
+                if verb.lower() in scenery.actions:
+                    scenery_action = verb.lower()
+                else:
+                    verb_classes = get_verb_classes(verb.lower())
+                    for action in scenery.actions.keys():
+                        if len(verb_classes.intersection(get_verb_classes(action))) > 0:
+                            scenery_action = action
+                            break
+                if scenery_action is not None:
+                    self.play_sections(scenery.actions[scenery_action], "yellow")
+                    if verb == "look":
+                        display_image_for_prompt(scenery.actions[scenery_action][0])
                     return True
         return False
 

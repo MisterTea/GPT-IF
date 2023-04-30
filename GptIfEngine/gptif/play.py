@@ -56,8 +56,17 @@ DIRECTION_SHORT_LONG_MAP = {
 @click.command()
 @click.option("--debug", default=False, is_flag=True)
 @click.option("--no-converse-server", default=False, is_flag=True)
+@click.option(
+    "--converse-server-url",
+    default="https://i00ny5xb4e.execute-api.us-east-1.amazonaws.com",
+)
 @click.option("--sql-url", default=None)
-def play(debug: bool, no_converse_server: bool, sql_url: Optional[str]):
+def play(
+    debug: bool,
+    no_converse_server: bool,
+    converse_server_url: str,
+    sql_url: Optional[str],
+):
     if sql_url is not None:
         os.environ["SQL_URL"] = sql_url
     elif "SQL_URL" not in os.environ:
@@ -73,10 +82,7 @@ def play(debug: bool, no_converse_server: bool, sql_url: Optional[str]):
         import gptif.converse
 
         gptif.converse.RUN_LOCALLY = False
-        gptif.converse.CONVERSE_SERVER = (
-            "https://i00ny5xb4e.execute-api.us-east-1.amazonaws.com"
-            # "http://localhost:8000"
-        )
+        gptif.converse.CONVERSE_SERVER = converse_server_url
 
     create_db_and_tables()
 
@@ -98,6 +104,11 @@ def play(debug: bool, no_converse_server: bool, sql_url: Optional[str]):
                 if len(command) == 0:
                     continue
                 verb = command.split(" ")[0].upper()
+
+                if verb == "GOAL":
+                    world.print_goal()
+                    continue
+
                 command_minus_verb = " ".join(command.split(" ")[1:])
                 verb_classes = get_verb_classes(verb)
                 if verb == "EXIT" or verb == "QUIT" or verb == "Q":

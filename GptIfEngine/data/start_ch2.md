@@ -23,3 +23,9 @@ And here you are, on an all-expenses paid cruise on the beautiful Fortuna. But n
 The VIP tour starts in two hours. In the meantime, you intend to meet as many people as you can, learn about the glorious ship, and pretend - just for a moment - that you belong on this gilded journey.
 
 {{ world.ask_to_press_key() }}
+
+```
+Your friendly developer here again.  If you ever forget what you are supposed to be going, use the GOAL command to get a summary of your current goals.  Just type "GOAL" on a line by itself, try it sometime!
+```
+
+{{ world.ask_to_press_key() }}

@@ -9,6 +9,7 @@ DEBUG_INPUT = [
     # 3 turns driving
     "LOOK AT RIVER",  #
     "LOOK AT THE RIVER",  #
+    "GOAL",  # GOAL does not cost a turn
     "WAIT",  #
     # 6 turns driving, at the terminal now
     "watch the television",

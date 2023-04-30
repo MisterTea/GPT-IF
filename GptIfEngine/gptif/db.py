@@ -18,6 +18,13 @@ class GptDialogue(SQLModel, table=True):
     stop_words: Optional[str] = Field(default=None)
 
 
+class AiImage(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    model_version: Optional[str] = Field(index=True, nullable=False)
+    prompt: str = Field(nullable=False)
+    result: Optional[bytes] = Field(nullable=False)
+
+
 def create_db_and_tables():
     sql_url = os.environ["SQL_URL"]
     if sql_url.startswith("sqlite"):
@@ -33,7 +40,8 @@ def create_db_and_tables():
     global engine
     engine = create_engine(sql_url, echo=False, connect_args=connect_args)
 
-    SQLModel.metadata.create_all(engine)
+    if sql_url.startswith("sqlite"):
+        SQLModel.metadata.create_all(engine)
 
 
 def get_answer_if_cached(dialogue: GptDialogue) -> Optional[str]:
@@ -57,3 +65,36 @@ def put_answer_in_cache(dialogue: GptDialogue):
         session.add(dialogue)
 
         session.commit()
+
+        session.refresh(dialogue)
+
+
+def get_ai_image_if_cached(query: AiImage) -> Optional[AiImage]:
+    with Session(engine) as session:
+        statement = (
+            select(AiImage)
+            .where(AiImage.model_version == query.model_version)
+            .where(AiImage.prompt == query.prompt)
+        )
+        results = list(session.exec(statement))
+        if len(results) == 0:
+            return None
+        return results[0]
+
+
+def get_ai_image_from_id(image_id: int) -> Optional[AiImage]:
+    with Session(engine) as session:
+        statement = select(AiImage).where(AiImage.id == image_id)
+        results = list(session.exec(statement))
+        if len(results) == 0:
+            return None
+        return results[0]
+
+
+def put_ai_image_in_cache(ai_image: AiImage):
+    with Session(engine) as session:
+        session.add(ai_image)
+
+        session.commit()
+
+        session.refresh(ai_image)

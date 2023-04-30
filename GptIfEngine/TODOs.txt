@@ -1,6 +1,5 @@
 skip person's name when just one person
 
-Add "people here" section
 Add quest line above room title
 tab completion
 
