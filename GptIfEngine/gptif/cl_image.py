@@ -23,7 +23,7 @@ from climage.__main__ import _get_color_type, _toAnsi
 def display_image(image_data_bytes: bytes):
     im = Image.open(io.BytesIO(image_data_bytes))
     ctype = _get_color_type(
-        is_truecolor=True, is_256color=False, is_16color=False, is_8color=False
+        is_truecolor=False, is_256color=True, is_16color=False, is_8color=False
     )
     output = _toAnsi(
         im, oWidth=80, is_unicode=True, color_type=ctype, palette="default"

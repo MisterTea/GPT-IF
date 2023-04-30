@@ -254,7 +254,8 @@ class World:
         saved_world = yaml.dump(self, Dumper=Dumper)
         return saved_world
 
-    def load(self, yaml_text):
+    @classmethod
+    def load(cls, yaml_text):
         world = yaml.load(yaml_text, Loader=Loader)
         return world
 
