@@ -451,23 +451,11 @@ After a few moments, the short conversation is over and June turns back to face 
         return False
 
     def play_sections(self, sections: List[str], style: Optional[str] = None):
-        buffer = ""
         for section in sections:
-            if section[:2] == "{{":
-                # Special command, dump the buffer first
-                if len(buffer) > 0:
-                    console.print(Markdown(buffer), style=style)
-                    console.print("\n")
-                    buffer = ""
             paragraph = jinja2.Environment().from_string(section).render(world=self)
-            if section[:2] != "{{":
-                if len(buffer) > 0:
-                    buffer += "\n\n"
-                buffer += paragraph
-        if len(buffer) > 0:
-            console.print(Markdown(buffer), style=style)
-            console.print("\n")
-            buffer = ""
+            if len(paragraph) > 0 and paragraph != "None":
+                console.print(Markdown(paragraph), style=style)
+                console.print("")
 
     def persuade(self, agent: Agent):
         if agent.friend_points < 2:

@@ -1,5 +1,13 @@
 FROM continuumio/miniconda3
 
+RUN pip install nltk==3.8.1 && pip install spacy==3.5.1
+
+RUN python -m spacy download en_core_web_sm
+# RUN python -m spacy download en_core_web_trf
+
+RUN python -c "import nltk; nltk.download(\"popular\")"
+RUN python -c "import nltk; nltk.download(\"verbnet\")"
+
 #COPY gpt_models gpt_models
 
 #RUN apt update
@@ -12,12 +20,6 @@ COPY requirements.txt .
 COPY setup.py .
 
 RUN pip install -r requirements.txt
-
-RUN python -m spacy download en_core_web_sm
-# RUN python -m spacy download en_core_web_trf
-
-RUN python -c "import nltk; nltk.download(\"popular\")"
-RUN python -c "import nltk; nltk.download(\"verbnet\")"
 
 COPY gptif gptif
 
