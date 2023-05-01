@@ -8,6 +8,7 @@ load_dotenv()  # take environment variables from .env.
 from fastapi import FastAPI
 from fastapi.responses import Response
 from pydantic import BaseModel
+from fastapi.security import OAuth2PasswordBearer
 
 from gptif.db import (
     GptDialogue,
@@ -27,6 +28,8 @@ root_path = f"/{stage}" if stage else "/"
 app = FastAPI(title="MyAwesomeApp", root_path=root_path)
 
 openai_model = OpenAiLanguageModel()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @app.on_event("startup")
