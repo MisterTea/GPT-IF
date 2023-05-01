@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()  # take environment variables from .env.
 
+import random
+
 import click
 from rich.markdown import Markdown
 
@@ -17,8 +19,7 @@ from gptif.parser import (
     get_verb_classes,
     handle_user_input,
 )
-from gptif.world import world, World
-import random
+from gptif.world import World, world
 
 
 class DummyContext(object):
@@ -91,13 +92,9 @@ def play(
 
         while True:
             while world.waiting_for_player is True:
-                if gptif.console.DEBUG_MODE and random.random() > 0.1:
-                    serialized_world = world.save()
-                    import gptif.world
-
-                    saved_world = World.load(serialized_world)
-                    gptif.world.world.upgrade(saved_world)
-                    gptif.world.world = saved_world
+                if gptif.console.DEBUG_MODE and random.random() > 0.5:
+                    serialized_world_state = world.save()
+                    world.load(serialized_world_state)
 
                 try:
                     command = console.get_input(">").strip()

@@ -1,22 +1,26 @@
 from __future__ import annotations
 
-import re
+import json
 import random
+import re
 from dataclasses import dataclass, field
+from enum import IntEnum
 from io import StringIO
 from typing import Dict, List, Optional, Set, Tuple
-from enum import IntEnum
-import yaml
-from md2py import md2py, TreeOfContents
+
 import jinja2
+import yaml
+from md2py import TreeOfContents, md2py
+from rich.console import Console
+from rich.markdown import Markdown
+
+import gptif.console
 from gptif.cl_image import display_image_for_prompt
 from gptif.console import console
-import gptif.console
-from rich.markdown import Markdown
-from rich.console import Console
 
 try:
-    from yaml import CLoader as Loader, CDumper as Dumper
+    from yaml import CDumper as Dumper
+    from yaml import CLoader as Loader
 except ImportError:
     from yaml import Loader, Dumper
 
@@ -79,7 +83,6 @@ class Agent:
     aliases: List[str]
     movement: Movement
 
-    player_visible_profile: AgentProfile
     room_id: Optional[str]
     tic_percentage: int = 0
     friend_points: int = 0
@@ -104,7 +107,6 @@ class Agent:
             agent_yaml.get("notes", []),
             agent_yaml.get("aliases", []),
             movement,
-            profile.init_player_visible(),
             movement.starting_room,
         )
 
@@ -164,7 +166,7 @@ class World:
     visited_rooms: Set[str] = field(default_factory=set)
     on_chapter: int = 0
     time_in_chapter: int = 0
-    wearing_uniform: bool = False
+    has_keycard: bool = False
 
     version: int = 1
 
@@ -250,13 +252,43 @@ class World:
 
         pass
 
-    def save(self):
-        saved_world = yaml.dump(self, Dumper=Dumper)
-        return saved_world
+    def save(self) -> str:
+        world_state = {
+            "waiting_for_player": self.waiting_for_player,
+            "active_agents": list(self.active_agents),
+            "current_room_id": self.current_room_id,
+            "time_in_room": self.time_in_room,
+            "visited_rooms": list(self.visited_rooms),
+            "on_chapter": self.on_chapter,
+            "time_in_chapter": self.time_in_chapter,
+            "has_keycard": self.has_keycard,
+            "version": self.version,
+        }
+        agent_states = {}
+        for agent_id, agent in self.agents.items():
+            agent_states[agent_id] = {
+                "room_id": agent.room_id,
+                "tic_percentage": agent.tic_percentage,
+                "friend_points": agent.friend_points,
+            }
+        return json.dumps({"world_state": world_state, "agent_states": agent_states})
 
-    @classmethod
-    def load(cls, yaml_text):
-        world = yaml.load(yaml_text, Loader=Loader)
+    def load(self, json_text):
+        j = json.loads(json_text)
+        world_state = j["world_state"]
+        for k1, v1 in world_state.items():
+            assert hasattr(self, k1)
+            setattr(self, k1, v1)
+
+        # Convert lists back to sets
+        self.active_agents = set(self.active_agents)
+        self.visited_rooms = set(self.visited_rooms)
+
+        agent_states = j["agent_states"]
+        for agent_id, agent_state in agent_states.items():
+            for k2, v2 in agent_state.items():
+                assert hasattr(self.agents[agent_id], k2)
+                setattr(self.agents[agent_id], k2, v2)
         return world
 
     def upgrade(self, newer_world: World):

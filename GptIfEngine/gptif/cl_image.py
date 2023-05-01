@@ -2,22 +2,22 @@ from dotenv import load_dotenv
 
 load_dotenv()  # take environment variables from .env.
 
-from PIL import Image
 import base64
 import io
+
 import openai
 import requests
+from climage.__main__ import _get_color_type, _toAnsi
+from PIL import Image
 
+import gptif.converse
+from gptif.console import console
 from gptif.db import (
     AiImage,
     get_ai_image_from_id,
     get_ai_image_if_cached,
     put_ai_image_in_cache,
 )
-from gptif.console import console
-import gptif.converse
-
-from climage.__main__ import _get_color_type, _toAnsi
 
 
 def display_image(image_data_bytes: bytes):
