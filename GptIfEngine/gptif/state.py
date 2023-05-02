@@ -25,8 +25,7 @@ try:
 except ImportError:
     from yaml import Loader, Dumper
 
-from gptif.parser import (get_hypernyms_set, get_verb_classes,
-                          get_verb_classes_for_list)
+from gptif.parser import get_hypernyms_set, get_verb_classes, get_verb_classes_for_list
 
 
 class Gender(IntEnum):

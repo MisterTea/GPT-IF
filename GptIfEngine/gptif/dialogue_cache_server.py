@@ -2,11 +2,12 @@ import base64
 import contextvars
 import os
 import uuid
+import json
 from typing import Annotated, Any, Dict, List, Optional, Tuple, Union, cast
 
 from dotenv import load_dotenv
 
-from gptif.console import ConsoleHandler
+from gptif.console import ConsoleHandler, request_id_contextvar
 from gptif.state import World
 
 load_dotenv()  # take environment variables from .env.
@@ -33,48 +34,10 @@ stage = os.environ.get("STAGE", None)
 root_path = f"/{stage}" if stage else "/"
 
 app = FastAPI(title="MyAwesomeApp", root_path=root_path)
-request_id_contextvar = contextvars.ContextVar("request_id", default="")
 
 openai_model = OpenAiLanguageModel()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-class BufferedConsoleHandler(ConsoleHandler):
-    def __init__(self):
-        self.buffers: Dict[str, List[Tuple[str, Optional[str]]]] = {}
-
-    def print(self, *objects: Any, style: Optional[str] = None):
-        request_id = request_id_contextvar.get()
-        assert len(request_id) > 0
-        if request_id not in self.buffers:
-            self.buffers[request_id] = []
-        self.buffers[request_id].append(
-            (BufferedConsoleHandler.merge_parameters(objects), style)
-        )
-
-    @staticmethod
-    def merge_parameters(*objects: Any) -> str:
-        return ", ".join([str(o) for o in objects])
-
-    def get_input(self, prompt: str) -> str:
-        raise NotImplementedError()
-
-    def input(self, prompt: str):
-        raise NotImplementedError()
-
-    def debug(self, *objects: Any):
-        pass
-
-    def warning(self, *objects: Any):
-        self.print(*objects, style="red on black")
-
-
-import gptif.console
-
-gptif.console.console = (
-    BufferedConsoleHandler()
-)  # Monkey patch our custom console handler
 
 
 class GameCommand(BaseModel):
@@ -168,13 +131,14 @@ async def handle_input(
     world = World()
     if game_state is not None:
         if not world.load(game_state):
-            raise HTTPException(status_code=400, detail="Incompatible world version")
+            # raise HTTPException(status_code=400, detail="Incompatible world version")
+            world.start_chapter_one()
+    else:
+        world.start_chapter_one()
     gptif.handle_input.handle_input(world, command.command)
     request_id = request_id_contextvar.get()
     response = Response(
-        content=cast(BufferedConsoleHandler, gptif.console.console).buffers.get(
-            request_id, []
-        )
+        content=json.dumps(gptif.console.console.buffers.get(request_id, []))
     )
     response.set_cookie(key="game_state", value=world.save())
     return response

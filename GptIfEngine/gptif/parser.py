@@ -1,6 +1,9 @@
+import os
+
+os.environ["NLTK_DATA"] = "nltk_data"
+
 from typing import Dict, List, Optional, Set, cast
 import nltk
-import os
 from nltk.corpus import wordnet
 from nltk.tokenize import word_tokenize
 from nltk import Nonterminal, nonterminals, Production, CFG
@@ -20,9 +23,9 @@ def flatten(xs):
             yield x
 
 
-if not os.path.exists(os.path.expanduser("~/nltk_data")):
-    nltk.download("popular")
-    nltk.download("verbnet")
+# if not os.path.exists(os.path.expanduser("~/nltk_data")):
+# nltk.download("wordnet")
+# nltk.download("verbnet")
 
 nlp = None
 
