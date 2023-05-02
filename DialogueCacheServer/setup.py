@@ -1,3 +1,3 @@
-from distutils.core import setup
+from setuptools import find_packages, setup
 
-setup(name="gptif", version="1.0", py_modules=["gptif"])
+setup(name="gptif", version="1.0", packages=find_packages(include=["gptif"]))

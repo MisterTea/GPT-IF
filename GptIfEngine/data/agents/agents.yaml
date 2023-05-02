@@ -71,7 +71,7 @@ taxi_driver:
     - Juan is driving Alfred to a cruise terminal.
 
   Tics:
-    percent_increase_per_tick: 100d1
+    percent_increase_per_tick: 100d1t
     creative:
       - Juan hums along to the radio, tapping his fingers on the steering wheel in time with the music.
       - Juan reaches up to adjust his baseball cap or scratch his goatee. He also taps his foot on the gas pedal, bouncing to the beat of the music.
@@ -130,7 +130,7 @@ port_security_officer:
 
 
   Tics:
-    percent_increase_per_tick: 100d1
+    percent_increase_per_tick: 100d1t
     creative:
       - Derrick Williams, the port security officer, taps his foot nervously as he waits for the next ship to arrive. He's been on the job for five years now, and he's seen his fair share of trouble. But there's something about this particular ship that has him on edge.
       - Derrick can't help but bite his nails as he scans the horizon for any sign of trouble. He knows that it's a bad habit, but he can't seem to break it. Maybe it's because he's so stressed out all the time.
@@ -245,7 +245,7 @@ vip_reporter:
     starting_room: vip_lounge
     script_id: nancy
   Tics:
-    percent_increase_per_tick: 100d1
+    percent_increase_per_tick: 100d1t
     creative:
       - "Nancy: (to herself) I wonder what's going on in this part of the ship."
       - Nancy repeatedly clicks her pen open and closed.

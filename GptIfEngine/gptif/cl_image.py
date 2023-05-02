@@ -10,7 +10,7 @@ import requests
 from climage.__main__ import _get_color_type, _toAnsi
 from PIL import Image
 
-import gptif.converse
+import gptif.settings
 from gptif.console import console
 from gptif.db import (
     AiImage,
@@ -32,8 +32,10 @@ def display_image(image_data_bytes: bytes):
 
 
 def display_image_for_prompt(prompt: str):
+    if gptif.settings.DEBUG_MODE == True or gptif.settings.CLI_MODE == False:
+        return
     query = AiImage(model_version="dalle", prompt=prompt)
-    if gptif.converse.CONVERSE_SERVER is None:
+    if gptif.settings.CONVERSE_SERVER is None:
         ai_image = get_ai_image_if_cached(query)
         if ai_image is None:
             # Grab the ai_image from openai
@@ -68,7 +70,7 @@ def display_image_for_prompt(prompt: str):
 
     else:
         response = requests.post(
-            f"{gptif.converse.CONVERSE_SERVER}/fetch_image_id_for_caption",
+            f"{gptif.settings.CONVERSE_SERVER}/fetch_image_id_for_caption",
             json=query.dict(),
         )
 
@@ -80,7 +82,7 @@ def display_image_for_prompt(prompt: str):
 
         image_id = int(response.content.decode().strip('"'))
 
-        response = requests.get(f"{gptif.converse.CONVERSE_SERVER}/ai_image/{image_id}")
+        response = requests.get(f"{gptif.settings.CONVERSE_SERVER}/ai_image/{image_id}")
 
         # TODO: More gracefully handle errors
         assert response.status_code == 200
@@ -94,5 +96,5 @@ def display_image_for_prompt(prompt: str):
 
 
 if __name__ == "__main__":
-    gptif.converse.CONVERSE_SERVER = "http://localhost:8000"
+    gptif.settings.CONVERSE_SERVER = "http://localhost:8000"
     display_image_for_prompt("Two dogs farting")

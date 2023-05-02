@@ -2,6 +2,8 @@ from typing import Any, Optional
 
 from rich.console import Console
 
+import gptif.settings
+
 DEBUG_INPUT = [
     'ASK Juan "Where are you from?"',  #
     "L",  #
@@ -81,8 +83,6 @@ DEBUG_INPUT = [
     "wait",
 ]
 
-DEBUG_MODE = True
-
 
 class ConsoleHandler:
     def __init__(self):
@@ -92,14 +92,14 @@ class ConsoleHandler:
         if len(DEBUG_INPUT) > 0:
             x = DEBUG_INPUT[0]
             DEBUG_INPUT.pop(0)
-            console.print()
-            console.print(prompt + x)
-            console.print("\n")
+            self.console.print()
+            self.console.print(prompt + x)
+            self.console.print("\n")
             return x
 
-        console.print()
+        self.console.print()
         x = self.console.input(prompt)
-        console.print("\n")
+        self.console.print("\n")
         return x
 
     def print(self, *objects: Any, style: Optional[str] = None):
@@ -109,12 +109,11 @@ class ConsoleHandler:
         return self.console.input(prompt)
 
     def debug(self, *objects: Any):
-        global DEBUG_MODE
-        if DEBUG_MODE is True:
+        if gptif.settings.DEBUG_MODE is True:
             self.console.print(*objects, style="bright_black on black")
 
     def warning(self, *objects: Any):
-        self.console.print(*objects, style="red on black")
+        self.print(*objects, style="red on black")
         if len(DEBUG_INPUT) > 0:
             # Shouldn't get warnings in debug mode...
             self.print("Got a warning in debug mode")

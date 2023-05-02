@@ -5,6 +5,8 @@ from typing import List, Optional
 import requests
 from rich.progress import Progress
 
+from gptif.console import console
+
 
 class LargeLanguageModel:
     def llm(self, question: str, stop: List[str] = [], echo: bool = False) -> str:

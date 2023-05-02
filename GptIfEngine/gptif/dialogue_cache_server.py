@@ -1,24 +1,31 @@
-import os
 import base64
+import contextvars
+import os
+import uuid
+from typing import Annotated, Any, Dict, List, Optional, Tuple, Union, cast
 
 from dotenv import load_dotenv
 
+from gptif.console import ConsoleHandler
+from gptif.state import World
+
 load_dotenv()  # take environment variables from .env.
 
-from fastapi import FastAPI
+from fastapi import Cookie, FastAPI, HTTPException
 from fastapi.responses import Response
-from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel
 
+import gptif.handle_input
 from gptif.db import (
-    GptDialogue,
     AiImage,
+    GptDialogue,
     create_db_and_tables,
-    get_answer_if_cached,
-    put_answer_in_cache,
-    get_ai_image_if_cached,
-    put_ai_image_in_cache,
     get_ai_image_from_id,
+    get_ai_image_if_cached,
+    get_answer_if_cached,
+    put_ai_image_in_cache,
+    put_answer_in_cache,
 )
 from gptif.llm import LlamaCppLanguageModel, OpenAiLanguageModel
 
@@ -26,15 +33,64 @@ stage = os.environ.get("STAGE", None)
 root_path = f"/{stage}" if stage else "/"
 
 app = FastAPI(title="MyAwesomeApp", root_path=root_path)
+request_id_contextvar = contextvars.ContextVar("request_id", default="")
 
 openai_model = OpenAiLanguageModel()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
+class BufferedConsoleHandler(ConsoleHandler):
+    def __init__(self):
+        self.buffers: Dict[str, List[Tuple[str, Optional[str]]]] = {}
+
+    def print(self, *objects: Any, style: Optional[str] = None):
+        request_id = request_id_contextvar.get()
+        assert len(request_id) > 0
+        if request_id not in self.buffers:
+            self.buffers[request_id] = []
+        self.buffers[request_id].append(
+            (BufferedConsoleHandler.merge_parameters(objects), style)
+        )
+
+    @staticmethod
+    def merge_parameters(*objects: Any) -> str:
+        return ", ".join([str(o) for o in objects])
+
+    def get_input(self, prompt: str) -> str:
+        raise NotImplementedError()
+
+    def input(self, prompt: str):
+        raise NotImplementedError()
+
+    def debug(self, *objects: Any):
+        pass
+
+    def warning(self, *objects: Any):
+        self.print(*objects, style="red on black")
+
+
+import gptif.console
+
+gptif.console.console = (
+    BufferedConsoleHandler()
+)  # Monkey patch our custom console handler
+
+
+class GameCommand(BaseModel):
+    command: str
+
+
 @app.on_event("startup")
 def on_startup():
     create_db_and_tables()
+
+
+@app.middleware("http")
+async def request_middleware(request, call_next):
+    request_id = str(uuid.uuid4())
+    request_id_contextvar.set(request_id)
+    return await call_next(request)
 
 
 @app.post("/fetch_dialogue")
@@ -103,3 +159,22 @@ async def put_dialogue(query: GptDialogue):
 @app.get("/")
 async def root():
     return {"message": "Hello World!"}
+
+
+@app.post("/handle_input")
+async def handle_input(
+    command: GameCommand, game_state: Annotated[Union[str, None], Cookie()] = None
+) -> Response:
+    world = World()
+    if game_state is not None:
+        if not world.load(game_state):
+            raise HTTPException(status_code=400, detail="Incompatible world version")
+    gptif.handle_input.handle_input(world, command.command)
+    request_id = request_id_contextvar.get()
+    response = Response(
+        content=cast(BufferedConsoleHandler, gptif.console.console).buffers.get(
+            request_id, []
+        )
+    )
+    response.set_cookie(key="game_state", value=world.save())
+    return response

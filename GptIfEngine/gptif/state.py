@@ -8,6 +8,7 @@ from enum import IntEnum
 from io import StringIO
 from typing import Dict, List, Optional, Set, Tuple
 
+import dice
 import jinja2
 import yaml
 from md2py import TreeOfContents, md2py
@@ -24,7 +25,8 @@ try:
 except ImportError:
     from yaml import Loader, Dumper
 
-from gptif.parser import get_hypernyms_set, get_verb_classes, get_verb_classes_for_list
+from gptif.parser import (get_hypernyms_set, get_verb_classes,
+                          get_verb_classes_for_list)
 
 
 class Gender(IntEnum):
@@ -94,7 +96,7 @@ class Agent:
             percent_increase_per_tic = agent_yaml["Tics"]["percent_increase_per_tick"]
             tic_creatives = [str(x) for x in agent_yaml["Tics"]["creative"]]
         else:
-            percent_increase_per_tic = "0d1"
+            percent_increase_per_tic = "0d1t"
             tic_creatives = []
         movement = Movement.from_yaml(agent_yaml["movement"])
 
@@ -169,6 +171,8 @@ class World:
     has_keycard: bool = False
 
     version: int = 1
+
+    random: random.Random = field(default_factory=random.Random)
 
     def __post_init__(self):
         global world
@@ -271,10 +275,21 @@ class World:
                 "tic_percentage": agent.tic_percentage,
                 "friend_points": agent.friend_points,
             }
-        return json.dumps({"world_state": world_state, "agent_states": agent_states})
+        return json.dumps(
+            {
+                "world_state": world_state,
+                "agent_states": agent_states,
+                "rng": self.random.getstate(),
+                "version": self.version,
+            }
+        )
 
-    def load(self, json_text):
+    def load(self, json_text) -> bool:
         j = json.loads(json_text)
+        if j["version"] != self.version:
+            # Incompatible
+            return False
+
         world_state = j["world_state"]
         for k1, v1 in world_state.items():
             assert hasattr(self, k1)
@@ -289,7 +304,13 @@ class World:
             for k2, v2 in agent_state.items():
                 assert hasattr(self.agents[agent_id], k2)
                 setattr(self.agents[agent_id], k2, v2)
-        return world
+
+        def convert_to_tuple(l):
+            return tuple(convert_to_tuple(x) for x in l) if type(l) is list else l
+
+        self.random.setstate(convert_to_tuple(j["rng"]))
+
+        return True
 
     def upgrade(self, newer_world: World):
         if self.version != newer_world.version:
@@ -318,8 +339,14 @@ class World:
         self.time_in_chapter += 1
         for agent in self.agents.values():
             if agent.room_id == self.current_room_id and len(agent.tic_creatives) > 0:
-                # Pick a random tic
-                self.play_sections([random.choice(agent.tic_creatives)], "purple")
+                assert agent.percent_increase_per_tic.endswith("t")
+                agent.tic_percentage += dice.roll(
+                    agent.percent_increase_per_tic, random=self.random
+                )
+                if agent.tic_percentage >= 100:
+                    agent.tic_percentage = 0
+                    # Pick a random tic
+                    self.play_sections([random.choice(agent.tic_creatives)], "purple")
             agent.movement.step(agent)
         if f"Tic {self.time_in_room}" in self.current_room.descriptions:
             self.play_sections(

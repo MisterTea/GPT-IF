@@ -5,21 +5,17 @@ from typing import List, Optional
 import requests
 from rich.progress import Progress
 
+import gptif.settings
 from gptif import db
 from gptif.console import console
 from gptif.llm import llm
 from gptif.state import Agent
-from gptif.world import world
-
-RUN_LOCALLY = True
-CONVERSE_SERVER: Optional[str] = None
 
 
 def get_answer_from_cache(dialogue: db.GptDialogue) -> Optional[str]:
-    global CONVERSE_SERVER
-    if CONVERSE_SERVER is not None:
+    if gptif.settings.CONVERSE_SERVER is not None:
         response = requests.post(
-            CONVERSE_SERVER + "/fetch_dialogue", json=dialogue.dict()
+            gptif.settings.CONVERSE_SERVER + "/fetch_dialogue", json=dialogue.dict()
         )
 
         console.debug("RESPONSE", response)
@@ -38,10 +34,9 @@ def get_answer_from_cache(dialogue: db.GptDialogue) -> Optional[str]:
 
 def put_answer_in_cache(dialogue: db.GptDialogue):
     console.debug("PUTTING ANSWER IN CACHE")
-    global CONVERSE_SERVER
-    if CONVERSE_SERVER is not None:
+    if gptif.settings.CONVERSE_SERVER is not None:
         response = requests.post(
-            CONVERSE_SERVER + "/put_dialogue", json=dialogue.dict()
+            gptif.settings.CONVERSE_SERVER + "/put_dialogue", json=dialogue.dict()
         )
 
         # TODO: More gracefully handle errors
