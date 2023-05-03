@@ -1,6 +1,7 @@
 {
   "name": "gptif-magnum",
   "version": "1.0.0",
+  "license": "UNLICENSED",
   "author": "Jason Gauci",
   "devDependencies": {
     "serverless-python-requirements": "^6.0.0"

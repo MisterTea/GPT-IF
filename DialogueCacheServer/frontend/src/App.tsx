@@ -7,6 +7,8 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import { KeyboardEvent, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 import './App.css';
 import DataStore from './datastore';
 import logo from './logo.svg'; // Tell webpack this JS file uses this image
@@ -37,9 +39,15 @@ const App = ({ datastore }: { datastore: DataStore }) => {
       <div className="App">
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
-            <ReactMarkdown>Hello, **world**!</ReactMarkdown>
-            <ReactMarkdown>Hello, **world**!</ReactMarkdown>
-            <ReactMarkdown>Hello, **world**!</ReactMarkdown>
+            <div><ReactMarkdown children={`Hello, **world**!`}></ReactMarkdown></div>
+            <div><ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} children={`<span style="color:blue">Exits</span>:
+
+* One
+* Twddo
+* Three`}></ReactMarkdown></div>
+            <div><ReactMarkdown>```
+              This is a code block!
+              ```</ReactMarkdown></div>
             <Box sx={{ display: 'flex', p: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1 }}>
                 <ArrowForwardIos sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
