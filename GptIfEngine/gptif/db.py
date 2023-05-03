@@ -25,6 +25,14 @@ class AiImage(SQLModel, table=True):
     result: Optional[bytes] = Field(nullable=False)
 
 
+class GameState(SQLModel, table=True):
+    session_id: str = Field(primary_key=True, nullable=False)
+    version: str
+    world_state: str
+    agent_states: str
+    rng: str
+
+
 def create_db_and_tables():
     sql_url = os.environ["SQL_URL"]
     if sql_url.startswith("sqlite"):
@@ -98,3 +106,19 @@ def put_ai_image_in_cache(ai_image: AiImage):
         session.commit()
 
         session.refresh(ai_image)
+
+
+def get_game_state_from_id(session_id: int) -> Optional[GameState]:
+    with Session(engine) as session:
+        statement = select(GameState).where(GameState.session_id == session_id)
+        results = list(session.exec(statement))
+        if len(results) == 0:
+            return None
+        return results[0]
+
+
+def upsert_game_state(game_state: GameState):
+    with Session(engine) as session:
+        session.add(game_state)
+
+        session.commit()

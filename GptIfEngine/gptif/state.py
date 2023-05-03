@@ -18,6 +18,7 @@ from rich.markdown import Markdown
 import gptif.console
 from gptif.cl_image import display_image_for_prompt
 from gptif.console import console
+from gptif.db import GameState
 
 try:
     from yaml import CDumper as Dumper
@@ -255,7 +256,7 @@ class World:
 
         pass
 
-    def save(self) -> str:
+    def save(self, game_state: GameState):
         world_state = {
             "waiting_for_player": self.waiting_for_player,
             "active_agents": list(self.active_agents),
@@ -274,22 +275,17 @@ class World:
                 "tic_percentage": agent.tic_percentage,
                 "friend_points": agent.friend_points,
             }
-        return json.dumps(
-            {
-                "world_state": world_state,
-                "agent_states": agent_states,
-                "rng": self.random.getstate(),
-                "version": self.version,
-            }
-        )
+        game_state.world_state = json.dumps(world_state)
+        game_state.agent_states = json.dumps(agent_states)
+        game_state.rng = json.dumps(self.random.getstate())
+        game_state.version = str(self.version)
 
-    def load(self, json_text) -> bool:
-        j = json.loads(json_text)
-        if j["version"] != self.version:
+    def load(self, session: GameState) -> bool:
+        if session.version != str(self.version):
             # Incompatible
             return False
 
-        world_state = j["world_state"]
+        world_state = json.loads(session.world_state)
         for k1, v1 in world_state.items():
             assert hasattr(self, k1)
             setattr(self, k1, v1)
@@ -298,7 +294,7 @@ class World:
         self.active_agents = set(self.active_agents)
         self.visited_rooms = set(self.visited_rooms)
 
-        agent_states = j["agent_states"]
+        agent_states = json.loads(session.agent_states)
         for agent_id, agent_state in agent_states.items():
             for k2, v2 in agent_state.items():
                 assert hasattr(self.agents[agent_id], k2)
@@ -307,7 +303,7 @@ class World:
         def convert_to_tuple(l):
             return tuple(convert_to_tuple(x) for x in l) if type(l) is list else l
 
-        self.random.setstate(convert_to_tuple(j["rng"]))
+        self.random.setstate(convert_to_tuple(json.loads(session.rng)))
 
         return True
 

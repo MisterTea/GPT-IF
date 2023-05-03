@@ -86,7 +86,7 @@ DEBUG_INPUT = [
     "wait",
 ]
 
-request_id_contextvar = contextvars.ContextVar("request_id", default="")
+session_id_contextvar = contextvars.ContextVar("session_id", default="")
 
 
 class ConsoleHandler:
@@ -109,11 +109,11 @@ class ConsoleHandler:
         return x
 
     def print(self, *objects: Any, style: Optional[str] = None):
-        request_id = request_id_contextvar.get()
-        if len(request_id) > 0:
-            if request_id not in self.buffers:
-                self.buffers[request_id] = []
-            self.buffers[request_id].append(
+        session_id = session_id_contextvar.get()
+        if len(session_id) > 0:
+            if session_id not in self.buffers:
+                self.buffers[session_id] = []
+            self.buffers[session_id].append(
                 (ConsoleHandler.merge_parameters(objects), style)
             )
         else:

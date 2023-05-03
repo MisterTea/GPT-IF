@@ -4,29 +4,38 @@ import os
 import uuid
 import json
 from typing import Annotated, Any, Dict, List, Optional, Tuple, Union, cast
+import nacl
+import nacl.secret
+import nacl.utils
 
 from dotenv import load_dotenv
 
-from gptif.console import ConsoleHandler, request_id_contextvar
+from gptif.console import ConsoleHandler, session_id_contextvar
 from gptif.state import World
 
 load_dotenv()  # take environment variables from .env.
 
-from fastapi import Cookie, FastAPI, HTTPException
+from fastapi import Cookie, FastAPI, HTTPException, Request
 from fastapi.responses import Response
-from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
+from fastapi import FastAPI, Form, HTTPException, Depends
+from starlette.responses import Response, HTMLResponse
+from starlette import status
+from jose import jwt
 
 import gptif.handle_input
 from gptif.db import (
     AiImage,
+    GameState,
     GptDialogue,
     create_db_and_tables,
     get_ai_image_from_id,
     get_ai_image_if_cached,
     get_answer_if_cached,
+    get_game_state_from_id,
     put_ai_image_in_cache,
     put_answer_in_cache,
+    upsert_game_state,
 )
 from gptif.llm import LlamaCppLanguageModel, OpenAiLanguageModel
 
@@ -37,7 +46,8 @@ app = FastAPI(title="MyAwesomeApp", root_path=root_path)
 
 openai_model = OpenAiLanguageModel()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+secret_key = base64.b64decode(os.environ["GPTIF_SECRET_KEY"])
+secret_box = nacl.secret.SecretBox(secret_key)
 
 
 class GameCommand(BaseModel):
@@ -49,11 +59,21 @@ def on_startup():
     create_db_and_tables()
 
 
-@app.middleware("http")
-async def request_middleware(request, call_next):
-    request_id = str(uuid.uuid4())
-    request_id_contextvar.set(request_id)
-    return await call_next(request)
+def fetch_session_id(
+    session_cookie: Annotated[Union[str, None], Cookie()] = None,
+) -> Optional[str]:
+    print("FETCHING SESSION ID")
+    print(session_cookie)
+    print(type(session_cookie))
+    if session_cookie is None:
+        return None
+    session_cookie_bytes = base64.b64decode(session_cookie)
+    session_cookie_decrypted = json.loads(
+        secret_box.decrypt(session_cookie_bytes).decode()
+    )
+    return session_cookie_decrypted.get(
+        "logged_in_id", session_cookie_decrypted["logged_out_id"]
+    )
 
 
 @app.post("/fetch_dialogue")
@@ -126,19 +146,49 @@ async def root():
 
 @app.post("/handle_input")
 async def handle_input(
-    command: GameCommand, game_state: Annotated[Union[str, None], Cookie()] = None
+    command: GameCommand, session_id=Depends(fetch_session_id)
 ) -> Response:
+    store_cookie = False
+    if session_id is None:
+        print("SESSION ID IS NONE")
+        session_id = str(uuid.uuid4())
+        session_cookie = json.dumps({"logged_out_id": session_id})
+        encrypted_session_cookie = base64.b64encode(
+            secret_box.encrypt(session_cookie.encode("utf-8"))
+        ).decode()
+        store_cookie = True
+    assert session_id is not None
+    print("SESSION ID", session_id)
+    session_id_contextvar.set(session_id)
+    print(gptif.console.console.buffers.get(session_id, []))
+
     world = World()
+    game_state = get_game_state_from_id(session_id)
     if game_state is not None:
         if not world.load(game_state):
+            assert False
             # raise HTTPException(status_code=400, detail="Incompatible world version")
             world.start_chapter_one()
     else:
+        print("NEW GAME")
+        if store_cookie == False:
+            assert False
+        game_state = GameState(session_id=session_id, version=world.version)
         world.start_chapter_one()
     gptif.handle_input.handle_input(world, command.command)
-    request_id = request_id_contextvar.get()
+    world.save(game_state)
+    print("NEW GAME STATE")
+    print(game_state)
+    upsert_game_state(game_state)
     response = Response(
-        content=json.dumps(gptif.console.console.buffers.get(request_id, []))
+        content=json.dumps(gptif.console.console.buffers.get(session_id, []))
     )
-    response.set_cookie(key="game_state", value=world.save())
+    print("BEFORE AND AFTER")
+    print(gptif.console.console.buffers.get(session_id, []))
+    if session_id in gptif.console.console.buffers:
+        del gptif.console.console.buffers[session_id]
+    print(gptif.console.console.buffers.get(session_id, []))
+    session_id_contextvar.set("")
+    if store_cookie:
+        response.set_cookie("session_cookie", encrypted_session_cookie)
     return response
