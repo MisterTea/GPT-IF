@@ -143,20 +143,41 @@ async def put_dialogue(query: GptDialogue):
 async def root():
     return {"message": "Hello World!"}
 
+@app.post("/begin_game")
+async def begin_game() -> Response:
+    session_id = str(uuid.uuid4())
+    session_cookie = json.dumps({"logged_out_id": session_id})
+    encrypted_session_cookie = base64.b64encode(
+        secret_box.encrypt(session_cookie.encode("utf-8"))
+    ).decode()
+    print("SESSION ID", session_id)
+    session_id_contextvar.set(session_id)
+    print(gptif.console.console.buffers.get(session_id, []))
+
+    world = World()
+    print("NEW GAME")
+    game_state = GameState(session_id=session_id, version=world.version)
+    world.start_chapter_one()
+    world.save(game_state)
+    print("NEW GAME STATE")
+    print(game_state)
+    upsert_game_state(game_state)
+    response = Response(
+        content=json.dumps(gptif.console.console.buffers.get(session_id, []))
+    )
+    if session_id in gptif.console.console.buffers:
+        del gptif.console.console.buffers[session_id]
+    session_id_contextvar.set("")
+    response.set_cookie("session_cookie", encrypted_session_cookie)
+    return response
+
 
 @app.post("/handle_input")
 async def handle_input(
     command: GameCommand, session_id=Depends(fetch_session_id)
 ) -> Response:
-    store_cookie = False
     if session_id is None:
-        print("SESSION ID IS NONE")
-        session_id = str(uuid.uuid4())
-        session_cookie = json.dumps({"logged_out_id": session_id})
-        encrypted_session_cookie = base64.b64encode(
-            secret_box.encrypt(session_cookie.encode("utf-8"))
-        ).decode()
-        store_cookie = True
+        raise HTTPException(status_code=400, detail="Sent input but there's no game")
     assert session_id is not None
     print("SESSION ID", session_id)
     session_id_contextvar.set(session_id)
@@ -164,16 +185,10 @@ async def handle_input(
 
     world = World()
     game_state = get_game_state_from_id(session_id)
-    if game_state is not None:
-        if not world.load(game_state):
-            assert False
-            # raise HTTPException(status_code=400, detail="Incompatible world version")
-            world.start_chapter_one()
-    else:
-        print("NEW GAME")
-        if store_cookie == False:
-            assert False
-        game_state = GameState(session_id=session_id, version=world.version)
+    assert game_state is not None, "Missing game state"
+    if not world.load(game_state):
+        assert False
+        # raise HTTPException(status_code=400, detail="Incompatible world version")
         world.start_chapter_one()
     gptif.handle_input.handle_input(world, command.command)
     world.save(game_state)
@@ -189,6 +204,4 @@ async def handle_input(
         del gptif.console.console.buffers[session_id]
     print(gptif.console.console.buffers.get(session_id, []))
     session_id_contextvar.set("")
-    if store_cookie:
-        response.set_cookie("session_cookie", encrypted_session_cookie)
     return response
