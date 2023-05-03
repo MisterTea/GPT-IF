@@ -22,15 +22,24 @@ const darkTheme = createTheme({
 const App = ({ datastore }: { datastore: DataStore }) => {
   const valueRef: React.MutableRefObject<any> = useRef('') //creating a refernce for TextField Component
 
-  function submit() {
+  function submit_command() {
     console.log("SUBMITTING");
     console.log(valueRef.current.value);
   }
 
   function submitIfEnter(e: KeyboardEvent) {
     if (e.key === "Enter") {
-      submit();
+      submit_command();
     }
+  }
+
+  function submit_new_game() {
+    console.log("STARTING NEW GAME");
+    fetch("/api/begin_game").then(async (value: Response) => {
+      console.log("GETTING BODY");
+      console.log(await value.json());
+      console.dir(await value.json());
+    })
   }
 
   return (
@@ -53,7 +62,7 @@ const App = ({ datastore }: { datastore: DataStore }) => {
                 <ArrowForwardIos sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
                 <TextField id="input-with-sx" label="Tap/Click here" variant="standard" fullWidth onKeyDown={submitIfEnter} inputRef={valueRef} />
               </Box>
-              <Button variant="contained" onClick={submit}>Submit</Button>
+              <Button variant="contained" onClick={submit_command}>Submit</Button>
             </Box>
           </Grid>
           <Grid item xs={12} md={6}>
@@ -61,7 +70,7 @@ const App = ({ datastore }: { datastore: DataStore }) => {
           </Grid>
           <Grid item xs={12}>
             <div>
-              <Button variant="contained">{datastore.blocks.length === 0 ? "Start Game" : "Restart Game"}</Button>
+              <Button variant="contained" onClick={submit_new_game}>{datastore.blocks.length === 0 ? "Start Game" : "Restart Game"}</Button>
             </div>
           </Grid>
         </Grid>

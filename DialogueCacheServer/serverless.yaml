@@ -4,6 +4,7 @@ frameworkVersion: '3'
 package:
   patterns:
     - "!venv/**"
+    - "!frontend/**"
 
 custom:
   pythonRequirements:
@@ -23,7 +24,10 @@ functions:
   api:
     handler: gptif.dialogue_cache_server_magnum.handler
     events:
-      - httpApi: '*'
+      - http:
+        path: /api/{proxy+}
+        method: any
+
 
 plugins:
   - serverless-python-requirements
