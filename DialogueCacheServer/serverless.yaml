@@ -23,10 +23,15 @@ provider:
 functions:
   api:
     handler: gptif.dialogue_cache_server_magnum.handler
+    environment:
+      STAGE: ${self:provider.stage}
     events:
       - http:
-        path: /api/{proxy+}
-        method: any
+          path: /api/{proxy+}
+          method: any
+      - http:
+          path: /api
+          method: any
 
 
 plugins:

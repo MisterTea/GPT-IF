@@ -7,7 +7,14 @@ import io
 
 import openai
 import requests
-from climage.__main__ import _get_color_type, _toAnsi
+
+import os
+
+stage = os.environ.get("STAGE", None)
+if stage is None:
+    from climage.__main__ import _get_color_type, _toAnsi
+
+
 from PIL import Image
 
 import gptif.settings
@@ -21,14 +28,15 @@ from gptif.db import (
 
 
 def display_image(image_data_bytes: bytes):
-    im = Image.open(io.BytesIO(image_data_bytes))
-    ctype = _get_color_type(
-        is_truecolor=False, is_256color=True, is_16color=False, is_8color=False
-    )
-    output = _toAnsi(
-        im, oWidth=80, is_unicode=True, color_type=ctype, palette="default"
-    )
-    print(output)
+    if stage is None:
+        im = Image.open(io.BytesIO(image_data_bytes))
+        ctype = _get_color_type(
+            is_truecolor=False, is_256color=True, is_16color=False, is_8color=False
+        )
+        output = _toAnsi(
+            im, oWidth=80, is_unicode=True, color_type=ctype, palette="default"
+        )
+        print(output)
 
 
 def display_image_for_prompt(prompt: str):

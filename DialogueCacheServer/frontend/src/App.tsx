@@ -35,7 +35,9 @@ const App = ({ datastore }: { datastore: DataStore }) => {
 
   function submit_new_game() {
     console.log("STARTING NEW GAME");
-    fetch("/api/begin_game").then(async (value: Response) => {
+    fetch("/api/begin_game", {
+      method: "POST"
+    }).then(async (value: Response) => {
       console.log("GETTING BODY");
       console.log(await value.json());
       console.dir(await value.json());

@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+
+load_dotenv()  # take environment variables from .env.
+
 import base64
 import contextvars
 import json
@@ -8,12 +12,10 @@ from typing import Annotated, Any, Dict, List, Optional, Tuple, Union, cast
 import nacl
 import nacl.secret
 import nacl.utils
-from dotenv import load_dotenv
 
 from gptif.console import ConsoleHandler, session_id_contextvar
 from gptif.state import World
 
-load_dotenv()  # take environment variables from .env.
 
 from fastapi import APIRouter, Cookie, Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import Response
@@ -39,10 +41,9 @@ from gptif.db import (
 from gptif.llm import LlamaCppLanguageModel, OpenAiLanguageModel
 
 stage = os.environ.get("STAGE", None)
-# root_path = f"/{stage}/" if stage else "/"
+root_path = f"/{stage}/" if stage else "/"
 
-# app = FastAPI(title="MyAwesomeApp", root_path=root_path)
-app = FastAPI(title="MyAwesomeApp")
+app = FastAPI(title="MyAwesomeApp", root_path=root_path)
 
 openai_model = OpenAiLanguageModel()
 
