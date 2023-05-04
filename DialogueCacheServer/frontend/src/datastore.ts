@@ -1,16 +1,27 @@
-import { makeObservable, observable } from "mobx";
+import { makeAutoObservable } from "mobx";
 
-class ChatBlock {
-  image_url: string | null = null;
-  chat_sections: string[] = [];
+export class ChatBlock {
+  imageUrl: string | null = null;
+  chatSections: string[] = [];
 }
 
 export default class DataStore {
   blocks: ChatBlock[] = [];
 
   constructor() {
-    makeObservable(this, {
-      blocks: observable,
-    });
+    makeAutoObservable(this);
+    // makeObservable(this, {
+    //   blocks: observable,
+    // });
+  }
+
+  newGame(chatBlock: ChatBlock) {
+    this.blocks.length = 0;
+    this.blocks.push(chatBlock);
+    console.log(this.blocks);
+  }
+
+  addChatBlock(chatBlock: ChatBlock) {
+    this.blocks.push(chatBlock);
   }
 }

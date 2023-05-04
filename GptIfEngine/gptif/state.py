@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass, field
 from enum import IntEnum
 from io import StringIO
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, cast
 
 import dice
 import jinja2
@@ -15,7 +15,7 @@ from md2py import TreeOfContents, md2py
 from rich.console import Console
 from rich.markdown import Markdown
 
-import gptif.console
+import gptif.settings
 from gptif.cl_image import display_image_for_prompt
 from gptif.console import console
 from gptif.db import GameState
@@ -319,7 +319,9 @@ class World:
         #         self.agents[agent_uid].upgrade(newer_world.agents[agent_uid])
 
     def ask_to_press_key(self):
-        if len(gptif.console.DEBUG_INPUT) > 0:
+        if not gptif.settings.CLI_MODE:
+            return
+        if gptif.settings.DEBUG_MODE:
             console.print("[blue]Press enter to continue...[/]")
         else:
             console.input("[blue]Press enter to continue...[/]")
@@ -335,8 +337,8 @@ class World:
         for agent in self.agents.values():
             if agent.room_id == self.current_room_id and len(agent.tic_creatives) > 0:
                 assert agent.percent_increase_per_tic.endswith("t")
-                agent.tic_percentage += dice.roll(
-                    agent.percent_increase_per_tic, random=self.random
+                agent.tic_percentage += cast(
+                    int, dice.roll(agent.percent_increase_per_tic, random=self.random)
                 )
                 if agent.tic_percentage >= 100:
                     agent.tic_percentage = 0
