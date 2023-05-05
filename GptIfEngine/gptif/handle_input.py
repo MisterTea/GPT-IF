@@ -56,6 +56,20 @@ def handle_input(world: World, command: str) -> bool:
 
     if len(command) == 0:
         return True
+
+    if command[0] == '"':
+        # Shortcut for chatting when only one person around
+        agents_in_room = world.agents_in_room
+        if len(agents_in_room) == 0:
+            console.warning("There is no one to talk to here")
+            return True
+        if len(agents_in_room) > 1:
+            console.warning(
+                f'Who did you want to talk to?  For example, to talk to {agents_in_room[0].name}, type TELL {agents_in_room[0].name} "Hi!"'
+            )
+            return True
+        command = f"TELL {agents_in_room[0].name} {command}"
+
     verb = command.split(" ")[0].upper()
 
     if verb == "GOAL":

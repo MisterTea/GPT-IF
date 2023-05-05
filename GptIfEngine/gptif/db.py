@@ -27,10 +27,10 @@ class AiImage(SQLModel, table=True):
 
 class GameState(SQLModel, table=True):
     session_id: str = Field(primary_key=True, nullable=False)
-    version: str
-    world_state: str
-    agent_states: str
-    rng: str
+    version: str = Field(nullable=False)
+    world_state: str = Field(nullable=False)
+    agent_states: str = Field(nullable=False)
+    rng: str = Field(nullable=False)
 
 
 def create_db_and_tables():

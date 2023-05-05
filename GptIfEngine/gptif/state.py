@@ -259,10 +259,10 @@ class World:
     def save(self, game_state: GameState):
         world_state = {
             "waiting_for_player": self.waiting_for_player,
-            "active_agents": list(self.active_agents),
+            "active_agents": list(sorted(self.active_agents)),
             "current_room_id": self.current_room_id,
             "time_in_room": self.time_in_room,
-            "visited_rooms": list(self.visited_rooms),
+            "visited_rooms": list(sorted(self.visited_rooms)),
             "on_chapter": self.on_chapter,
             "time_in_chapter": self.time_in_chapter,
             "has_keycard": self.has_keycard,

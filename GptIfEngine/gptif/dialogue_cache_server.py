@@ -194,7 +194,7 @@ async def begin_game() -> JSONResponse:
 
     world = World()
     print("NEW GAME")
-    game_state = GameState(session_id=session_id, version=world.version)
+    game_state = GameState(session_id=session_id)  # type: ignore
     world.start_chapter_one()
     world.save(game_state)
     print("NEW GAME STATE")

@@ -10,7 +10,7 @@ import gptif.settings
 DEBUG_INPUT = [
     'ASK Juan "Where are you from?"',  #
     "L",  #
-    'ASK Juan "What are you doing right now?"',  #
+    '"What are you doing right now?"',  #
     # 3 turns driving
     "LOOK AT RIVER",  #
     "LOOK AT THE RIVER",  #

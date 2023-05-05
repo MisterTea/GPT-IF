@@ -13,7 +13,7 @@ from rich.markdown import Markdown
 import gptif.settings
 from gptif.console import console
 from gptif.converse import check_if_more_friendly, converse
-from gptif.db import create_db_and_tables
+from gptif.db import GameState, create_db_and_tables
 from gptif.handle_input import handle_input
 from gptif.parser import (
     ParseException,
@@ -70,13 +70,18 @@ def play(
                 if gptif.settings.DEBUG_MODE:
                     import copy
 
-                    world_copy = copy.deepcopy(world)
-                    serialized_world = world.save()
+                    game_state = GameState(session_id="")  # type: ignore
+                    world.save(game_state)
 
                     world = World()
-                    assert world.load(serialized_world)
+                    assert world.load(game_state)
+                    new_game_state = GameState(session_id="")  # type: ignore
+                    world.save(new_game_state)
 
-                    assert world.save() == world_copy.save()
+                    if game_state != new_game_state:
+                        print(game_state)
+                        print(new_game_state)
+                        assert False
                 try:
                     command = console.get_input(">").strip()
                 except KeyboardInterrupt as ki:
