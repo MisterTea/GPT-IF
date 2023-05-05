@@ -51,9 +51,8 @@ def play(
 
     gptif.settings.CLI_MODE = True
 
-    if not debug:
-        gptif.settings.DEBUG_INPUT.clear()
-        gptif.settings.DEBUG_MODE = False
+    if debug:
+        gptif.settings.DEBUG_MODE = True
 
     if no_converse_server == False:
         gptif.settings.RUN_LOCALLY = False

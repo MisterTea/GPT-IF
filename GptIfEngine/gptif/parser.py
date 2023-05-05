@@ -28,6 +28,10 @@ def flatten(xs):
 # nltk.download("verbnet")
 
 nlp = None
+if "STAGE" in os.environ:
+    nlp = spacy.load(f"/var/task/en_core_web_sm/en_core_web_sm-3.5.0")
+else:
+    nlp = spacy.load("en_core_web_sm")
 
 
 class ParseException(Exception):
@@ -222,9 +226,6 @@ def handle_user_input(user_input: str):
 
 def get_direct_object(command: str) -> str:
     global nlp
-    if nlp is None:
-        nlp = spacy.load("en_core_web_sm")
-
     # user_input_tokens = word_tokenize(user_input)
 
     doc = nlp(command)

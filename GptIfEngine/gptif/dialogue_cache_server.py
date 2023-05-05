@@ -142,6 +142,9 @@ async def fetch_image_id_for_caption(query: AiImage) -> str:
     return str(ai_image.id)
 
 
+import gzip
+
+
 @app.get(
     "/api/ai_image/{image_id}",
     responses={200: {"content": {"image/png": {}}}},
@@ -155,7 +158,12 @@ async def ai_image(image_id: str) -> Response:
     ai_image = get_ai_image_from_id(int_id)
     if ai_image is None:
         raise Exception("Oops")
-    return Response(content=ai_image.result, media_type="image/png")
+    assert ai_image.result is not None
+    return Response(
+        content=gzip.compress(ai_image.result),
+        media_type="image/png",
+        headers={"Content-Encoding": "gzip"},
+    )
 
 
 @app.post("/api/put_dialogue")

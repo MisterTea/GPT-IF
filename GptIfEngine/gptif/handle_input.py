@@ -1,4 +1,5 @@
 import os
+import re
 from typing import Optional
 
 from dotenv import load_dotenv
@@ -47,6 +48,9 @@ DIRECTION_SHORT_LONG_MAP = {
 
 
 def handle_input(world: World, command: str) -> bool:
+    # Convert unicode quotes
+    command = re.sub("[\u201c\u201d]", '"', command)
+
     # Remove redundant whitespace
     command = " ".join(command.split())
 

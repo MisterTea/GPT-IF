@@ -40,7 +40,7 @@ def display_image(image_data_bytes: bytes):
 
 
 def display_image_for_prompt(prompt: str):
-    if gptif.settings.DEBUG_MODE == True or gptif.settings.CLI_MODE == False:
+    if gptif.settings.DEBUG_MODE == True:
         return
     query = AiImage(model_version="dalle", prompt=prompt)
     if gptif.settings.CONVERSE_SERVER is None:
@@ -70,6 +70,10 @@ def display_image_for_prompt(prompt: str):
             ai_image_id = ai_image.id
 
         assert ai_image_id is not None
+        if not gptif.settings.CLI_MODE:
+            console.print(f"%%IMAGE%% {ai_image_id}")
+            return
+
         ai_image = get_ai_image_from_id(ai_image_id)
 
         assert ai_image is not None

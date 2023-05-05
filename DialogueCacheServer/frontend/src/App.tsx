@@ -6,7 +6,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import { observer } from "mobx-react";
-import { KeyboardEvent, useRef } from 'react';
+import { KeyboardEvent, useRef, useState } from 'react';
 //import rehypeRaw from 'rehype-raw';
 //import remarkDirective from 'remark-directive';
 //import remarkGfm from 'remark-gfm';
@@ -14,6 +14,7 @@ import { Marked } from '@ts-stack/markdown';
 import './App.css';
 import DataStore, { ChatBlock } from './datastore';
 import logo from './logo.svg'; // Tell webpack this JS file uses this image
+import ReactAnimatedEllipsis from './ReactAnimatedEllipses';
 
 var API_SERVER_BASE: string = "/";
 if (window.location.hostname.endsWith("amazonaws.com")) {
@@ -42,7 +43,10 @@ const fetchPlus = (url: string, options = {}, retries: number): Promise<any> =>
 const App = observer(({ datastore }: { datastore: DataStore }) => {
   const valueRef: React.MutableRefObject<any> = useRef('') //creating a refernce for TextField Component
 
-  function createChatBlockFromResponse(responseResults: any) {
+  const [waitingForAnswer, setWaitingForAnswer] = useState(false);
+  const [gameImage, setGameImage] = useState(logo);
+
+  function createChatBlockFromResponse(responseResults: any[]) {
     const chatBlock = new ChatBlock();
     const chatSections = responseResults.map((responseResult: any[]) => {
       var responseText = responseResult[0];
@@ -62,8 +66,15 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       acceptedTags.forEach(acceptedTag => {
         responseText = responseText.replaceAll("[" + acceptedTag + "]", "<span class=\"game_markdown_" + acceptedTag.replaceAll(" ", "_") + "\">")
       });
+      if (responseText.includes("%%IMAGE%%")) {
+        const image_id = responseText.split(" ")[1];
+        const image_url = API_SERVER_BASE + "api/ai_image/" + image_id;
+        console.log("GOT IMAGE: " + image_url);
+        setGameImage(image_url);
+        return null;
+      }
       return Marked.parse(responseText);
-    })
+    }).filter(response => response !== null) as string[];
     chatBlock.chatSections = chatSections;
     return chatBlock;
   }
@@ -78,6 +89,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
     const userInputBlock = new ChatBlock();
     userInputBlock.chatSections.push("> " + command);
     datastore.addChatBlock(userInputBlock);
+    setWaitingForAnswer(true);
     fetchPlus(API_SERVER_BASE + "api/handle_input", {
       method: "POST",
       headers: {
@@ -85,11 +97,12 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       },
       body: JSON.stringify({ "command": command }),
       credentials: 'include',
-    }, 3).then((responseResults: string) => {
+    }, 3).then((responseResults: any[]) => {
       //const responseResults = await value.json();
       console.log(responseResults);
       const chatBlock = createChatBlockFromResponse(responseResults);
       datastore.addChatBlock(chatBlock);
+      setWaitingForAnswer(false);
     })
   }
 
@@ -101,12 +114,14 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
 
   function submit_new_game() {
     console.log("STARTING NEW GAME");
+    setWaitingForAnswer(true);
     fetchPlus(API_SERVER_BASE + "api/begin_game", {
       method: "POST",
       credentials: 'include',
-    }, 3).then((responseResults: string) => {
+    }, 3).then((responseResults: any[]) => {
       const chatBlock = createChatBlockFromResponse(responseResults);
       datastore.newGame(chatBlock);
+      setWaitingForAnswer(false);
     });
   }
 
@@ -119,8 +134,19 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
   </ul>
   );
 
+  var ellipses = null;
+
+  if (waitingForAnswer) {
+    ellipses = (
+      <ReactAnimatedEllipsis
+        fontSize="3rem"
+        marginLeft="5px"
+        spacing="0.3rem" />
+    );
+  }
+
   var commandBox = null;
-  if (datastore.blocks.length > 0) {
+  if (!waitingForAnswer && datastore.blocks.length > 0) {
     commandBox = (
       <Box sx={{ display: 'flex', p: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1 }}>
@@ -132,6 +158,11 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
     );
   }
 
+  var logoStyle = {}
+  if (window.innerWidth >= 900) {
+    logoStyle = { position: "absolute", bottom: "0px" };
+  }
+
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
@@ -139,10 +170,11 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
         <Grid container spacing={2}>
           <Grid item xs={12} md={6} style={{ whiteSpace: "normal" }}>
             {game_text}
+            {ellipses}
             {commandBox}
           </Grid>
-          <Grid item xs={12} md={6}>
-            <img src={logo} alt="Logo" />
+          <Grid item xs={12} md={6} style={{ position: "relative", minHeight: "400px" }}>
+            <img src={gameImage} alt="Logo" style={logoStyle} />
           </Grid>
           <Grid item xs={12}>
             <div>

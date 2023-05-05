@@ -2767,6 +2767,11 @@ ajv@^8.0.0, ajv@^8.6.0, ajv@^8.9.0:
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
+animated-ellipsis@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/animated-ellipsis/-/animated-ellipsis-0.2.0.tgz#a3d790dc62e65b5de39ca8de9b7bbe5ca4c86dc8"
+  integrity sha512-hnFWhbJDsKSk3nWQKwPnxaCHM5Lgg0bpB51/Mgt63JgXUMjD4qsef7SypuSS+cdNP1PV67l67lognX23KrpHIQ==
+
 ansi-escapes@^4.2.1, ansi-escapes@^4.3.1:
   version "4.3.2"
   resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-4.3.2.tgz#6b2291d1db7d98b6521d5f1efa42d0f3a9feb65e"

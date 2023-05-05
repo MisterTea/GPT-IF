@@ -7,7 +7,7 @@ from typing import Optional
 
 RUN_LOCALLY = True
 CONVERSE_SERVER: Optional[str] = None
-DEBUG_MODE = True
+DEBUG_MODE = False
 CLI_MODE = False
 
 if "SQL_URL" not in os.environ:
