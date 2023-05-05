@@ -26,6 +26,19 @@ const darkTheme = createTheme({
   },
 });
 
+const fetchPlus = (url: string, options = {}, retries: number): Promise<any> =>
+  fetch(url, options)
+    .then(res => {
+      if (res.ok) {
+        return res.json()
+      }
+      if (retries > 0) {
+        return fetchPlus(url, options, retries - 1)
+      }
+      throw new Error(res.status.toString())
+    })
+    .catch(error => console.error(error.message));
+
 const App = observer(({ datastore }: { datastore: DataStore }) => {
   const valueRef: React.MutableRefObject<any> = useRef('') //creating a refernce for TextField Component
 
@@ -44,7 +57,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       }
 
       // Replace rich tags with spans
-      const acceptedTags = ["yellow", "blue", "bright_blue bold", "yellow bold", "purple"]
+      const acceptedTags = ["yellow", "blue", "bright_blue bold", "yellow bold", "purple", "green", "light_green", "red on black"]
       responseText = responseText.replaceAll("[/]", "</span>")
       acceptedTags.forEach(acceptedTag => {
         responseText = responseText.replaceAll("[" + acceptedTag + "]", "<span class=\"game_markdown_" + acceptedTag.replaceAll(" ", "_") + "\">")
@@ -62,20 +75,22 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
     valueRef.current.value = "";
     console.log("SUBMITTING");
     console.log(valueRef.current.value);
-    fetch(API_SERVER_BASE + "api/handle_input", {
+    const userInputBlock = new ChatBlock();
+    userInputBlock.chatSections.push("> " + command);
+    datastore.addChatBlock(userInputBlock);
+    fetchPlus(API_SERVER_BASE + "api/handle_input", {
       method: "POST",
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ "command": command }),
       credentials: 'include',
-    }).then(async (value: Response) => {
-      console.log("GETTING BODY");
-      const responseResults = await value.json();
+    }, 3).then((responseResults: string) => {
+      //const responseResults = await value.json();
       console.log(responseResults);
       const chatBlock = createChatBlockFromResponse(responseResults);
       datastore.addChatBlock(chatBlock);
-    });
+    })
   }
 
   function submitIfEnter(e: KeyboardEvent) {
@@ -86,12 +101,10 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
 
   function submit_new_game() {
     console.log("STARTING NEW GAME");
-    fetch(API_SERVER_BASE + "api/begin_game", {
+    fetchPlus(API_SERVER_BASE + "api/begin_game", {
       method: "POST",
       credentials: 'include',
-    }).then(async (value: Response) => {
-      console.log("GETTING BODY");
-      const responseResults = await value.json();
+    }, 3).then((responseResults: string) => {
       const chatBlock = createChatBlockFromResponse(responseResults);
       datastore.newGame(chatBlock);
     });
@@ -124,7 +137,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       <CssBaseline />
       <div className="App">
         <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={6} style={{ whiteSpace: "normal" }}>
             {game_text}
             {commandBox}
           </Grid>

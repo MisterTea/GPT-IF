@@ -27,6 +27,10 @@ functions:
       STAGE: ${self:provider.stage}
     events:
       - http:
+          path: /
+          method: any
+          cors: true
+      - http:
           path: /api/{proxy+}
           method: any
           cors: true

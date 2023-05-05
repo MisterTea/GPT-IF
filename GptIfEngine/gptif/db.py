@@ -46,7 +46,9 @@ def create_db_and_tables():
     console.debug("OPENING DB AT", sql_url)
 
     global engine
-    engine = create_engine(sql_url, echo=False, connect_args=connect_args)
+    engine = create_engine(
+        sql_url, echo=False, pool_pre_ping=True, connect_args=connect_args
+    )
 
     if sql_url.startswith("sqlite"):
         SQLModel.metadata.create_all(engine)

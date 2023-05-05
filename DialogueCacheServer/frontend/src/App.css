@@ -30,6 +30,36 @@
   color: #61dafb;
 }
 
+.game_markdown_yellow {
+  color: olive;
+}
+
+.game_markdown_light_green {
+  color: lightgreen;
+}
+
+.game_markdown_green {
+  color: green;
+}
+
+.game_markdown_red_on_black {
+  color: red;
+}
+
+.game_markdown_yellow_bold {
+  color: olive;
+  font-weight: bold;
+}
+
+.game_markdown_purple {
+  color: purple;
+}
+
+.game_markdown_bright_blue_bold {
+  color: blue;
+  font-weight: bold;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

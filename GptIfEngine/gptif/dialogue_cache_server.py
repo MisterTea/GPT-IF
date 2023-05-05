@@ -16,6 +16,7 @@ import nacl.utils
 from gptif.console import ConsoleHandler, session_id_contextvar
 from gptif.state import World
 
+from fastapi.responses import RedirectResponse
 
 from fastapi import APIRouter, Cookie, Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import Response
@@ -162,13 +163,13 @@ async def put_dialogue(query: GptDialogue):
     put_answer_in_cache(query)
 
 
+@app.get("/")
+async def send_to_index():
+    return RedirectResponse("index.html")
+
+
 @app.get("/api")
 async def root():
-    return {"message": "Hello World!"}
-
-
-@app.post("/api")
-async def root_post():
     return {"message": "Hello World!"}
 
 

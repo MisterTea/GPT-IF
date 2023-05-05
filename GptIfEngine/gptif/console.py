@@ -137,7 +137,7 @@ class ConsoleHandler:
 
     def warning(self, *objects: Any):
         self.print(*objects, style="red on black")
-        if len(DEBUG_INPUT) > 0:
+        if gptif.settings.DEBUG_MODE:
             # Shouldn't get warnings in debug mode...
             self.print("Got a warning in debug mode")
 
