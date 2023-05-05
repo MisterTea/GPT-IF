@@ -128,6 +128,7 @@ class Agent:
 @dataclass
 class Scenery:
     uid: str
+    hints: Set[str]
     room_scope: Optional[Set[str]]
     names: Set[str]
     actions: Dict[str, List[str]]
@@ -240,6 +241,7 @@ class World:
             for scenery_uid, scenery_yaml in all_scenery_yaml.items():
                 scenery = Scenery(
                     scenery_uid,
+                    set(scenery_yaml["hints"]),
                     set(scenery_yaml["rooms"]),
                     set(scenery_yaml["names"]),
                     scenery_actions[scenery_uid],
@@ -247,6 +249,20 @@ class World:
                 # Attach scenery to all rooms listed
                 for room_id in scenery_yaml["rooms"]:
                     self.rooms[room_id].scenery.append(scenery)
+
+        # Adjust room descriptions based on scenery
+        for room in self.rooms.values():
+            for description_list in room.descriptions.values():
+                for scenery in room.scenery:
+                    for scenery_hint in scenery.hints:
+                        for i, description in enumerate(description_list):
+                            description_list[i] = re.sub(
+                                f"({scenery_hint})",
+                                "**\\1**",
+                                description,
+                                0,
+                                re.MULTILINE | re.IGNORECASE,
+                            )
 
         # Load agents
         with open("data/agents/agents.yaml", "r") as agent_file:
@@ -443,13 +459,13 @@ After a few moments, the short conversation is over and June turns back to face 
 
     def look(self):
         self.print_header()
-        self.play_sections(self.current_room.descriptions["Long"], style="yellow")
+        self.play_sections(self.current_room.descriptions["Long"], markdown=True)
         display_image_for_prompt(self.current_room.descriptions["Long"][0])
         self.print_footer()
 
     def look_quickly(self):
         self.print_header()
-        self.play_sections(self.current_room.descriptions["Short"], style="yellow")
+        self.play_sections(self.current_room.descriptions["Short"], markdown=True)
         self.print_footer()
 
     @property
@@ -534,11 +550,16 @@ After a few moments, the short conversation is over and June turns back to face 
                     return True
         return False
 
-    def play_sections(self, sections: List[str], style: Optional[str] = None):
+    def play_sections(
+        self, sections: List[str], style: Optional[str] = None, markdown: bool = True
+    ):
         for section in sections:
             paragraph = jinja2.Environment().from_string(section).render(world=self)
             if len(paragraph) > 0 and paragraph != "None":
-                console.print(Markdown(paragraph), style=style)
+                if markdown:
+                    console.print(Markdown(paragraph), style=style)
+                else:
+                    console.print(paragraph, style=style)
                 console.print("")
 
     def persuade(self, agent: Agent):
@@ -571,7 +592,7 @@ Derrick quickly scans your paperwork and hands you your room key.
 
         with open("data/start_ch1.md", "r") as fp:
             sections = fp.read().split("\n\n")
-            self.play_sections(sections, "yellow")
+            self.play_sections(sections)
 
     def start_ch2(self):
         self.active_agents = set()
@@ -580,7 +601,7 @@ Derrick quickly scans your paperwork and hands you your room key.
 
         with open("data/start_ch2.md", "r") as fp:
             sections = fp.read().split("\n\n")
-            self.play_sections(sections, "yellow")
+            self.play_sections(sections)
 
     def start_ch3(self):
         self.active_agents = set(
@@ -599,7 +620,7 @@ Derrick quickly scans your paperwork and hands you your room key.
 
         with open("data/start_ch3.md", "r") as fp:
             sections = fp.read().split("\n\n")
-            self.play_sections(sections, "yellow")
+            self.play_sections(sections)
 
     def start_ch4(self):
         self.on_chapter = 4
@@ -611,7 +632,7 @@ Derrick quickly scans your paperwork and hands you your room key.
 
         with open("data/start_ch5.md", "r") as fp:
             sections = fp.read().split("\n\n")
-            self.play_sections(sections, "yellow")
+            self.play_sections(sections)
 
         # Move some agents around
         self.agents["vip_reporter"].room_id = "pool_deck"

@@ -4,6 +4,10 @@
 
 It's a beautiful day in Tampa, and you're excited to be taking a taxi to the cruise terminal. As you ride, you look out the window and see the cityscape passing by. You pass by tall buildings, busy streets, and parks. You can see the Hillsborough River in the distance.
 
+```
+If you haven't yet, try LOOKing at anything highlighted in bold.  For example, you can LOOK AT THE TERMINAL.
+```
+
 ## Tic 3
 
 After a while, you reach the outskirts of the city and you start to see more open space. You pass by farms, fields, and forests. You can smell the fresh air, and you can hear the birds singing. You feel relaxed and happy, and you know that you're going to have a great time on your cruise.
@@ -26,9 +30,9 @@ Finally, you arrive at the cruise terminal. You get out of the taxi and pay the 
 
 You are standing in the cruise terminal. It is a large, bustling space with people everywhere. There are families with small children, couples on their honeymoon, and groups of friends on vacation. Everyone is excited to be here, and the atmosphere is electric.
 
-The cruise terminal is divided into several sections. There is a _check-in desk_ where you can get your boarding pass and luggage tags. There is also a _security area_ where you will be screened for weapons and other prohibited items. Once you have cleared security, you will find yourself in the departure lounge. This is where you will wait to board your ship.
+The cruise terminal is divided into several sections. There is a check-in desk where you can get your boarding pass and luggage tags. There is also a security area where you will be screened for weapons and other prohibited items. Once you have cleared security, you will find yourself in the departure lounge. This is where you will wait to board your ship.
 
-The _departure lounge_ is a large, comfortable space with plenty of seating. There are also several restaurants and shops where you can buy food, drinks, and souvenirs. If you are feeling restless, you can also take a walk around the terminal or relax in one of the many _lounge chairs_.
+The departure lounge is a large, comfortable space with plenty of seating. There are also several restaurants and shops where you can buy food, drinks, and souvenirs. If you are feeling restless, you can also take a walk around the terminal or relax in one of the many lounge chairs.
 
 A television screen fixed to a column is playing an information video on loop. This may be a good time to **watch the television**.
 

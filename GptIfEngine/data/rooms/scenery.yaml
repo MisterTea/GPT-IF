@@ -1,24 +1,14 @@
-taxi_people:
-  names:
-    - people.n.01
-    - social_group.n.01
-    - person.n.01
-  rooms:
-    - driving_to_terminal
-
 taxi_cruise_terminal:
+  hints:
+    - cruise terminal
   names:
     - facility.n.01
   rooms:
     - driving_to_terminal
 
 taxi_cityscape:
-  names:
-    - body_of_water.n.01
-  rooms:
-    - driving_to_terminal
-
-taxi_river:
+  hints:
+    - cityscape
   names:
     - cityscape.n.01
     - structure.n.01
@@ -27,26 +17,52 @@ taxi_river:
   rooms:
     - driving_to_terminal
 
+taxi_river:
+  hints:
+    - river
+  names:
+    - body_of_water.n.01
+  rooms:
+    - driving_to_terminal
+
 taxi:
+  hints:
+    - taxi
   names:
     - wheeled_vehicle.n.01
     - vehicle.n.01
   rooms:
     - driving_to_terminal
 
+cruise_terminal_people:
+  hints:
+    - people everywhere
+  names:
+    - people.n.01
+    - social_group.n.01
+    - person.n.01
+  rooms:
+    - cruise_terminal
+
 cruise_terminal_check_in_desk:
+  hints:
+    - check-in desk
   names:
     - table.n.02
   rooms:
     - cruise_terminal
 
 cruise_terminal_security_area:
+  hints:
+    - security area 
   names:
     - area.n.01
   rooms:
     - cruise_terminal
 
 cruise_terminal_chair:
+  hints:
+    - lounge chairs
   names:
     - seat.n.03
     - seat.n.04
@@ -54,24 +70,32 @@ cruise_terminal_chair:
     - cruise_terminal
 
 cruise_terminal_lounge:
+  hints:
+    - departure lounge
   names:
     - room.n.01
   rooms:
     - cruise_terminal
 
 cruise_terminal_tv:
+  hints:
+    - television
   names:
     - television.n.01
   rooms:
     - cruise_terminal
 
 gangway_passengers:
+  hints:
+    - crowded with passengers
   names:
     - traveler.n.01
   rooms:
     - gangway
 
 gangway_gangway:
+  hints:
+    - gangway
   names:
     - bridge.n.01
     - way.n.06
@@ -79,6 +103,8 @@ gangway_gangway:
     - gangway
 
 atrium_fountain:
+  hints:
+    - fountain
   names:
     - plumbing_fixture.n.01
     - fountain.n.01

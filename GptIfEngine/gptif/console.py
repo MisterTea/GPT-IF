@@ -13,7 +13,7 @@ DEBUG_INPUT = [
     '"What are you doing right now?"',  #
     # 3 turns driving
     "LOOK AT RIVER",  #
-    "LOOK AT THE RIVER",  #
+    "LOOK AT THE TERMINAL",  #
     "GOAL",  # GOAL does not cost a turn
     "WAIT",  #
     # 6 turns driving, at the terminal now

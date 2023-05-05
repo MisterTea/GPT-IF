@@ -1,9 +1,3 @@
-# taxi_people
-
-## look
-
-The guests at a cruise terminal are a diverse group of people from all walks of life. There are families with young children, couples on their honeymoon, groups of friends, and solo travelers. People of all ages and from all over the world come together to enjoy a cruise vacation. The guests are excited to explore new places, relax on the beach, and make new memories. They are all looking forward to a fun and relaxing vacation.
-
 # taxi_cruise_terminal
 
 ## look
@@ -53,6 +47,12 @@ There is also a small trash can in the back of the taxi. This is where you can d
 The taxi is equipped with a variety of safety features. These features include airbags, seatbelts, and a fire extinguisher.
 
 The taxi is also equipped with a GPS system. This system allows the driver to navigate to your destination quickly and easily.
+
+# cruise_terminal_people
+
+## look
+
+The guests at a cruise terminal are a diverse group of people from all walks of life. There are families with young children, couples on their honeymoon, groups of friends, and solo travelers. People of all ages and from all over the world come together to enjoy a cruise vacation. The guests are excited to explore new places, relax on the beach, and make new memories. They are all looking forward to a fun and relaxing vacation.
 
 # cruise_terminal_check_in_desk
 
