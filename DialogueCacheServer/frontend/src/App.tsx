@@ -160,7 +160,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
 
   var logoStyle = {}
   if (window.innerWidth >= 900) {
-    logoStyle = { position: "absolute", bottom: "0px" };
+    logoStyle = { position: "absolute", bottom: "0px", width: "100%" };
   }
 
   return (

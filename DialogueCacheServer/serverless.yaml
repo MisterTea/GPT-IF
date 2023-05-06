@@ -1,20 +1,15 @@
 service: gptif-magnum
 frameworkVersion: '3'
 
-package:
-  patterns:
-    - "!venv/**"
-    - "!frontend/**"
-
-custom:
-  pythonRequirements:
-    dockerizePip: true
-
 provider:
   name: aws
-  memorySize: 256
+  memorySize: 512
   timeout: 30
-  runtime: python3.9
+  ecr:
+    images:
+      gptif_image:
+        path: ..
+        file: aws_server.dockerfile
   region: us-east-1
   stage: ${opt:stage, "dev"}
   environment:
@@ -22,9 +17,13 @@ provider:
 
 functions:
   api:
-    handler: gptif.dialogue_cache_server_magnum.handler
+    image:
+      name: gptif_image
     environment:
       STAGE: ${self:provider.stage}
+      POWERTOOLS_SERVICE_NAME: GptIfBackend
+      POWERTOOLS_METRICS_NAMESPACE: GptIf
+      SPACY_DATA_DIR: /var/task
     events:
       - http:
           path: /
@@ -38,7 +37,3 @@ functions:
           path: /api
           method: any
           cors: true
-
-
-plugins:
-  - serverless-python-requirements

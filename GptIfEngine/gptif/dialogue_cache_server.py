@@ -13,8 +13,11 @@ import nacl
 import nacl.secret
 import nacl.utils
 
+import gptif.console
 from gptif.console import ConsoleHandler, session_id_contextvar
 from gptif.state import World
+from gptif.backend_utils import logger, metrics
+from aws_lambda_powertools.metrics import MetricUnit
 
 from fastapi.responses import RedirectResponse
 
@@ -26,6 +29,8 @@ from starlette import status
 from starlette.responses import HTMLResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
+from typing import Callable
 
 import gptif.handle_input
 from gptif.db import (
@@ -42,11 +47,34 @@ from gptif.db import (
     upsert_game_state,
 )
 from gptif.llm import LlamaCppLanguageModel, OpenAiLanguageModel
+from starlette.exceptions import ExceptionMiddleware
 
 stage = os.environ.get("STAGE", None)
 root_path = f"/{stage}/" if stage else "/"
 
 app = FastAPI(title="MyAwesomeApp", root_path=root_path)
+
+
+class LoggerRouteHandler(APIRoute):
+    def get_route_handler(self) -> Callable:
+        original_route_handler = super().get_route_handler()
+
+        async def route_handler(request: Request) -> Response:
+            # Add fastapi context to logs
+            ctx = {
+                "path": request.url.path,
+                "route": self.path,
+                "method": request.method,
+            }
+            logger.append_keys(fastapi=ctx)
+            logger.info("Received request")
+
+            return await original_route_handler(request)
+
+        return route_handler
+
+
+app.router.route_class = LoggerRouteHandler
 
 origins = [
     "http://gptif-site.s3-website-us-east-1.amazonaws.com",
@@ -64,6 +92,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.add_middleware(ExceptionMiddleware, handlers=app.exception_handlers)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request, err):
+    logger.exception("Unhandled exception")
+    metrics.add_metric(name="Crash", unit=MetricUnit.Count, value=1)
+    return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
+
 
 openai_model = OpenAiLanguageModel()
 
@@ -83,20 +122,21 @@ def on_startup():
 def fetch_session_id(
     session_cookie: Annotated[Union[str, None], Cookie()] = None,
 ) -> Optional[str]:
-    print("FETCHING SESSION ID")
-    print(session_cookie)
-    print(type(session_cookie))
+    logger.info("FETCHING SESSION ID")
+    logger.info(session_cookie)
+    logger.info(type(session_cookie))
     if session_cookie is None:
         return None
     session_cookie_bytes = base64.b64decode(session_cookie)
     session_cookie_decrypted = json.loads(
         secret_box.decrypt(session_cookie_bytes).decode()
     )
-    print(session_cookie_decrypted)
+    logger.info(session_cookie_decrypted)
     session_id = session_cookie_decrypted.get(
         "logged_in_id", session_cookie_decrypted["logged_out_id"]
     )
-    print(session_id)
+    logger.info(session_id)
+    logger.set_correlation_id(session_id)
     return session_id
 
 
@@ -188,23 +228,25 @@ async def begin_game() -> JSONResponse:
     encrypted_session_cookie = base64.b64encode(
         secret_box.encrypt(session_cookie.encode("utf-8"))
     ).decode()
-    print("SESSION ID", session_id)
+    logger.info(f"SESSION ID {session_id}")
     session_id_contextvar.set(session_id)
-    print(gptif.console.console.buffers.get(session_id, []))
+    logger.info(gptif.console.console.buffers.get(session_id, []))
 
     world = World()
-    print("NEW GAME")
+    logger.info("NEW GAME")
     game_state = GameState(session_id=session_id)  # type: ignore
     world.start_chapter_one()
     world.save(game_state)
-    print("NEW GAME STATE")
-    print(game_state)
+    logger.info("NEW GAME STATE")
+    logger.info(game_state)
     upsert_game_state(game_state)
     response = JSONResponse(content=gptif.console.console.buffers.get(session_id, []))
     if session_id in gptif.console.console.buffers:
         del gptif.console.console.buffers[session_id]
     session_id_contextvar.set("")
     response.set_cookie("session_cookie", encrypted_session_cookie)
+    logger.set_correlation_id(session_id)
+    metrics.add_metric(name="StartedGame", unit=MetricUnit.Count, value=1)
     return response
 
 
@@ -212,14 +254,14 @@ async def begin_game() -> JSONResponse:
 async def handle_input(
     command: GameCommand, session_id=Depends(fetch_session_id)
 ) -> JSONResponse:
-    print("IN POST")
-    print(session_id)
+    logger.info("IN POST")
+    logger.info(session_id)
     if session_id is None:
         raise HTTPException(status_code=400, detail="Sent input but there's no game")
     assert session_id is not None
-    print("SESSION ID", session_id)
+    logger.info(f"SESSION ID {session_id}")
     session_id_contextvar.set(session_id)
-    print(gptif.console.console.buffers.get(session_id, []))
+    logger.info(gptif.console.console.buffers.get(session_id, []))
 
     world = World()
     game_state = get_game_state_from_id(session_id)
@@ -230,14 +272,14 @@ async def handle_input(
         world.start_chapter_one()
     gptif.handle_input.handle_input(world, command.command)
     world.save(game_state)
-    print("NEW GAME STATE")
-    print(game_state)
+    logger.info("NEW GAME STATE")
+    logger.info(game_state)
     upsert_game_state(game_state)
     response = JSONResponse(content=gptif.console.console.buffers.get(session_id, []))
-    print("BEFORE AND AFTER")
-    print(gptif.console.console.buffers.get(session_id, []))
+    logger.info("BEFORE AND AFTER")
+    logger.info(gptif.console.console.buffers.get(session_id, []))
     if session_id in gptif.console.console.buffers:
         del gptif.console.console.buffers[session_id]
-    print(gptif.console.console.buffers.get(session_id, []))
+    logger.info(gptif.console.console.buffers.get(session_id, []))
     session_id_contextvar.set("")
     return response

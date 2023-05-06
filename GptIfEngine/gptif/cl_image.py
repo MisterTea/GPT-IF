@@ -13,9 +13,7 @@ import os
 stage = os.environ.get("STAGE", None)
 if stage is None:
     from climage.__main__ import _get_color_type, _toAnsi
-
-
-from PIL import Image
+    from PIL import Image
 
 import gptif.settings
 from gptif.console import console
