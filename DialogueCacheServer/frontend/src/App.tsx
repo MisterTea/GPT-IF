@@ -1,19 +1,18 @@
 import { ArrowForwardIos } from '@mui/icons-material';
-import { Grid } from '@mui/material';
+import { Alert, AlertColor, AlertTitle, Grid } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import { observer } from "mobx-react";
-import { KeyboardEvent, useRef, useState } from 'react';
+import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 //import rehypeRaw from 'rehype-raw';
 //import remarkDirective from 'remark-directive';
 //import remarkGfm from 'remark-gfm';
 import { Marked } from '@ts-stack/markdown';
 import './App.css';
 import DataStore, { ChatBlock } from './datastore';
-import logo from './logo.svg'; // Tell webpack this JS file uses this image
 import ReactAnimatedEllipsis from './ReactAnimatedEllipses';
 
 var API_SERVER_BASE: string = "/";
@@ -27,24 +26,51 @@ const darkTheme = createTheme({
   },
 });
 
+interface GptifAlert {
+  message: string;
+  title: string;
+  severity: AlertColor;
+  duration: number;
+}
+
 const fetchPlus = (url: string, options = {}, retries: number): Promise<any> =>
   fetch(url, options)
     .then(res => {
       if (res.ok) {
-        return res.json()
+        return res.json();
       }
       if (retries > 0) {
-        return fetchPlus(url, options, retries - 1)
+        return fetchPlus(url, options, retries - 1);
       }
-      throw new Error(res.status.toString())
+      throw new Error(res.status.toString());
     })
-    .catch(error => console.error(error.message));
+    .catch(error => {
+      throw error;
+    });
 
 const App = observer(({ datastore }: { datastore: DataStore }) => {
   const valueRef: React.MutableRefObject<any> = useRef('') //creating a refernce for TextField Component
 
-  const [waitingForAnswer, setWaitingForAnswer] = useState(false);
-  const [gameImage, setGameImage] = useState(logo);
+  const [waitingForAnswer, setWaitingForAnswer] = useState<boolean>(false);
+  const [gameImage, setGameImage] = useState<string | null>(null);
+  const [alerts, setAlerts] = useState<GptifAlert[]>([]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (alerts.length === 0) {
+        return;
+      }
+
+      alerts.forEach(alert => {
+        alert.duration -= 1;
+      });
+      setAlerts(alerts.filter((alert) => {
+        return alert.duration > 0;
+      }))
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [alerts, setAlerts]);
 
   function createChatBlockFromResponse(responseResults: any[]) {
     const chatBlock = new ChatBlock();
@@ -103,6 +129,12 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       const chatBlock = createChatBlockFromResponse(responseResults);
       datastore.addChatBlock(chatBlock);
       setWaitingForAnswer(false);
+    }).catch((reason: any) => {
+      console.log("FETCH FAILED");
+      console.log(reason);
+      setWaitingForAnswer(false);
+      const newAlert: GptifAlert = { message: "Could not send command: " + reason, duration: 5, title: "Command failed", severity: "error" };
+      setAlerts([...alerts, newAlert]);
     })
   }
 
@@ -122,6 +154,11 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       const chatBlock = createChatBlockFromResponse(responseResults);
       datastore.newGame(chatBlock);
       setWaitingForAnswer(false);
+    }).catch((reason: any) => {
+      console.log("FETCH FAILED");
+      console.log(reason);
+      const newAlert: GptifAlert = { message: "Could not start the game: " + reason, duration: 5, title: "Can't start game", severity: "error" };
+      setAlerts([...alerts, newAlert]);
     });
   }
 
@@ -151,11 +188,31 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       <Box sx={{ display: 'flex', p: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1 }}>
           <ArrowForwardIos sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
-          <TextField id="input-with-sx" label="Tap/Click here" variant="standard" fullWidth onKeyDown={submitIfEnter} inputRef={valueRef} />
+          <TextField id="input-with-sx" label="Tap/Click here" variant="standard" fullWidth onKeyDown={submitIfEnter} inputRef={valueRef} autoComplete="off" />
         </Box>
         <Button variant="contained" onClick={submit_command}>Submit</Button>
       </Box>
     );
+  }
+
+  var alertHtml = null;
+  var alertIndex = 0;
+  if (alerts.length > 0) {
+    alertHtml = (
+      <Grid item xs={12}>
+        {
+          alerts.map((alert: GptifAlert) => {
+            alertIndex += 1;
+            return (
+              <Alert severity={alert.severity} key={"Alert_" + alertIndex}>
+                <AlertTitle>{alert.title}</AlertTitle>
+                {alert.message}
+              </Alert>
+            );
+          })
+        }
+      </Grid>
+    )
   }
 
   var logoStyle = {}
@@ -163,18 +220,24 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
     logoStyle = { position: "absolute", bottom: "0px", width: "100%" };
   }
 
+  var gameImageHtml = null;
+  if (gameImage !== null) {
+    gameImageHtml = <img src={gameImage} alt="Logo" style={logoStyle} />;
+  }
+
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <div className="App">
         <Grid container spacing={2}>
+          {alertHtml}
           <Grid item xs={12} md={6} style={{ whiteSpace: "normal" }}>
             {game_text}
             {ellipses}
             {commandBox}
           </Grid>
           <Grid item xs={12} md={6} style={{ position: "relative", minHeight: "400px" }}>
-            <img src={gameImage} alt="Logo" style={logoStyle} />
+            {gameImageHtml}
           </Grid>
           <Grid item xs={12}>
             <div>

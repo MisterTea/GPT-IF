@@ -1,38 +1,40 @@
+import os
+
 from dotenv import load_dotenv
 
 load_dotenv()  # take environment variables from .env.
 
+import bugsnag
+
+bugsnag.configure(
+    api_key=os.environ["BUGSNAG_API_KEY"],
+    project_root=os.getcwd(),
+)
+
 import base64
 import contextvars
 import json
-import os
 import uuid
-from typing import Annotated, Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Annotated, Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import nacl
 import nacl.secret
 import nacl.utils
-
-import gptif.console
-from gptif.console import ConsoleHandler, session_id_contextvar
-from gptif.state import World
-from gptif.backend_utils import logger, metrics
 from aws_lambda_powertools.metrics import MetricUnit
-
-from fastapi.responses import RedirectResponse
-
 from fastapi import APIRouter, Cookie, Depends, FastAPI, Form, HTTPException, Request
-from fastapi.responses import Response
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, RedirectResponse, Response
+from fastapi.routing import APIRoute
 from jose import jwt
 from pydantic import BaseModel
 from starlette import status
+from starlette.exceptions import ExceptionMiddleware
 from starlette.responses import HTMLResponse, Response
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.routing import APIRoute
-from typing import Callable
 
+import gptif.console
 import gptif.handle_input
+from gptif.backend_utils import logger, metrics
+from gptif.console import ConsoleHandler, session_id_contextvar
 from gptif.db import (
     AiImage,
     GameState,
@@ -47,7 +49,7 @@ from gptif.db import (
     upsert_game_state,
 )
 from gptif.llm import LlamaCppLanguageModel, OpenAiLanguageModel
-from starlette.exceptions import ExceptionMiddleware
+from gptif.state import World
 
 stage = os.environ.get("STAGE", None)
 root_path = f"/{stage}/" if stage else "/"
@@ -94,15 +96,17 @@ app.add_middleware(
 )
 
 
-app.add_middleware(ExceptionMiddleware, handlers=app.exception_handlers)
-
-
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request, err):
     logger.exception("Unhandled exception")
+    bugsnag.notify(err)
     metrics.add_metric(name="Crash", unit=MetricUnit.Count, value=1)
-    return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
+    return JSONResponse(
+        status_code=500, content={"detail": "Internal Server Error: " + str(err)}
+    )
 
+
+app.add_middleware(ExceptionMiddleware, handlers=app.exception_handlers)
 
 openai_model = OpenAiLanguageModel()
 
@@ -237,8 +241,6 @@ async def begin_game() -> JSONResponse:
     game_state = GameState(session_id=session_id)  # type: ignore
     world.start_chapter_one()
     world.save(game_state)
-    logger.info("NEW GAME STATE")
-    logger.info(game_state)
     upsert_game_state(game_state)
     response = JSONResponse(content=gptif.console.console.buffers.get(session_id, []))
     if session_id in gptif.console.console.buffers:
@@ -272,8 +274,6 @@ async def handle_input(
         world.start_chapter_one()
     gptif.handle_input.handle_input(world, command.command)
     world.save(game_state)
-    logger.info("NEW GAME STATE")
-    logger.info(game_state)
     upsert_game_state(game_state)
     response = JSONResponse(content=gptif.console.console.buffers.get(session_id, []))
     logger.info("BEFORE AND AFTER")

@@ -20,6 +20,8 @@ types-PyYAML==6.0.12.9
 python-jose==3.3.0
 pynacl==1.5.0
 aws-lambda-powertools==2.15.0
+bugsnag==4.4.0
+uvicorn==0.22.0
 
 fastapi==0.95.0
 mangum==0.17.0
