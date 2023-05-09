@@ -157,6 +157,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
     }).catch((reason: any) => {
       console.log("FETCH FAILED");
       console.log(reason);
+      setWaitingForAnswer(false);
       const newAlert: GptifAlert = { message: "Could not start the game: " + reason, duration: 5, title: "Can't start game", severity: "error" };
       setAlerts([...alerts, newAlert]);
     });
@@ -199,19 +200,15 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
   var alertIndex = 0;
   if (alerts.length > 0) {
     alertHtml = (
-      <Grid item xs={12}>
-        {
-          alerts.map((alert: GptifAlert) => {
-            alertIndex += 1;
-            return (
-              <Alert severity={alert.severity} key={"Alert_" + alertIndex}>
-                <AlertTitle>{alert.title}</AlertTitle>
-                {alert.message}
-              </Alert>
-            );
-          })
-        }
-      </Grid>
+      alerts.map((alert: GptifAlert) => {
+        alertIndex += 1;
+        return (
+          <Alert severity={alert.severity} key={"Alert_" + alertIndex}>
+            <AlertTitle>{alert.title}</AlertTitle>
+            {alert.message}
+          </Alert>
+        );
+      })
     )
   }
 
@@ -230,10 +227,10 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       <CssBaseline />
       <div className="App">
         <Grid container spacing={2}>
-          {alertHtml}
           <Grid item xs={12} md={6} style={{ whiteSpace: "normal" }}>
             {game_text}
             {ellipses}
+            {alertHtml}
             {commandBox}
           </Grid>
           <Grid item xs={12} md={6} style={{ position: "relative", minHeight: "400px" }}>
