@@ -1,3 +1,4 @@
+from typing import Optional
 from dotenv import load_dotenv
 
 load_dotenv()  # take environment variables from .env.
@@ -37,6 +38,26 @@ def display_image(image_data_bytes: bytes):
         print(output)
 
 
+def generate_image(prompt: str) -> Optional[bytes]:
+    try:
+        # Grab the ai_image from openai
+        import openai
+
+        response = openai.Image.create(
+            prompt=prompt,
+            n=1,
+            size="256x256",
+            response_format="b64_json",
+        )
+
+        image_data_b64 = response["data"][0]["b64_json"]
+        image_data_bytes = base64.b64decode(image_data_b64)
+        return image_data_bytes
+    except Exception as ex:
+        console.debug(ex)
+        return None
+
+
 def display_image_for_prompt(prompt: str):
     if gptif.settings.DEBUG_MODE == True:
         return
@@ -44,30 +65,22 @@ def display_image_for_prompt(prompt: str):
     if gptif.settings.CONVERSE_SERVER is None:
         ai_image = get_ai_image_if_cached(query)
         if ai_image is None:
-            # Grab the ai_image from openai
-            import openai
+            image_data_bytes = generate_image(query.prompt)
+            if image_data_bytes is not None:
+                query.result = image_data_bytes
+                put_ai_image_in_cache(query)
 
-            response = openai.Image.create(
-                prompt=query.prompt,
-                n=1,
-                size="256x256",
-                response_format="b64_json",
-            )
+                assert query.id is not None
 
-            image_data_b64 = response["data"][0]["b64_json"]
-            image_data_bytes = base64.b64decode(image_data_b64)
-            query.result = image_data_bytes
-
-            put_ai_image_in_cache(query)
-
-            assert query.id is not None
-
-            ai_image_id = query.id
+                ai_image_id = query.id
+            else:
+                ai_image_id = None
         else:
             assert ai_image.id is not None
             ai_image_id = ai_image.id
 
-        assert ai_image_id is not None
+        if ai_image_id is None:
+            return
         if not gptif.settings.CLI_MODE:
             console.print(f"%%IMAGE%% {ai_image_id}")
             return
@@ -90,19 +103,22 @@ def display_image_for_prompt(prompt: str):
         # TODO: More gracefully handle errors
         assert response.status_code == 200
 
-        image_id = int(response.content.decode().strip('"'))
+        if response.content is not None:
+            image_id = int(response.content.decode().strip('"'))
 
-        response = requests.get(f"{gptif.settings.CONVERSE_SERVER}/ai_image/{image_id}")
+            response = requests.get(
+                f"{gptif.settings.CONVERSE_SERVER}/ai_image/{image_id}"
+            )
 
-        # TODO: More gracefully handle errors
-        assert response.status_code == 200
+            # TODO: More gracefully handle errors
+            assert response.status_code == 200
 
-        # print(response.content)
+            # print(response.content)
 
-        # image_data_b64 = response["data"][0]["b64_json"]
-        # image_data_bytes = base64.b64decode(image_data_b64)
+            # image_data_b64 = response["data"][0]["b64_json"]
+            # image_data_bytes = base64.b64decode(image_data_b64)
 
-        display_image(response.content)
+            display_image(response.content)
 
 
 if __name__ == "__main__":

@@ -2,6 +2,8 @@ import os
 
 from dotenv import load_dotenv
 
+from gptif.cl_image import generate_image
+
 load_dotenv()  # take environment variables from .env.
 
 import bugsnag
@@ -161,28 +163,22 @@ async def fetch_dialogue(query: GptDialogue) -> str:
 
 
 @app.post("/api/fetch_image_id_for_caption")
-async def fetch_image_id_for_caption(query: AiImage) -> str:
+async def fetch_image_id_for_caption(query: AiImage) -> Optional[str]:
     ai_image = get_ai_image_if_cached(query)
     if ai_image is None:
-        # Grab the ai_image from openai
-        import openai
+        image_data_bytes = generate_image(query.prompt)
 
-        response = openai.Image.create(
-            prompt=query.prompt,
-            n=1,
-            size="256x256",
-            response_format="b64_json",
-        )
+        if image_data_bytes is None:
+            bugsnag.notify(Exception(f"Invalid DALL-E query: {query.prompt}"))
+            return None
+        else:
+            query.result = image_data_bytes
 
-        image_data_b64 = response["data"][0]["b64_json"]
-        image_data_bytes = base64.b64decode(image_data_b64)
-        query.result = image_data_bytes
+            put_ai_image_in_cache(query)
 
-        put_ai_image_in_cache(query)
+            assert query.id is not None
 
-        assert query.id is not None
-
-        return str(query.id)
+            return str(query.id)
     return str(ai_image.id)
 
 
