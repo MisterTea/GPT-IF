@@ -87,7 +87,8 @@ Alfred: {statement}
     console.debug("Cached answer:", cached_answer)
     if cached_answer is not None:
         return cached_answer
-    console.print(f"[purple]{target_agent.profile.name} thinks for a moment...[/]")
+    if gptif.settings.CLI_MODE:
+        console.print(f"[purple]{target_agent.profile.name} thinks for a moment...[/]")
     while True:
         answer = llm.llm(
             dialogue.context, stop=dialogue.stop_words.split(","), echo=False
@@ -139,7 +140,6 @@ No
             else:
                 assert "no" in cached_answer.lower(), cached_answer
                 return False
-        console.print(f"[purple]{target_agent.profile.name} thinks for a moment...[/]")
         while True:
             answer = llm.llm(context, stop=dialogue.stop_words.split(","), echo=False)
             answer_text = answer

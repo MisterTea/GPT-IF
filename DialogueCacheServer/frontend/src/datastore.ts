@@ -7,6 +7,7 @@ export class ChatBlock {
 
 export default class DataStore {
   blocks: ChatBlock[] = [];
+  currentBlock: ChatBlock|null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -18,10 +19,11 @@ export default class DataStore {
   newGame(chatBlock: ChatBlock) {
     this.blocks.length = 0;
     this.blocks.push(chatBlock);
-    console.log(this.blocks);
+    this.currentBlock = chatBlock;
   }
 
   addChatBlock(chatBlock: ChatBlock) {
     this.blocks.push(chatBlock);
+    this.currentBlock = chatBlock;
   }
 }

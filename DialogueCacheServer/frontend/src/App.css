@@ -1,7 +1,7 @@
 .App {
   /*text-align: center;*/
-  background-color:black;
-  color:white;
+  background-color: black;
+  color: white;
 }
 
 .App-logo {
@@ -23,7 +23,7 @@
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: #FBFEF9;
 }
 
 .App-link {
@@ -39,7 +39,7 @@
 }
 
 .game_markdown_green {
-  color: green;
+  color: #4D8B31;
 }
 
 .game_markdown_red_on_black {
@@ -52,7 +52,7 @@
 }
 
 .game_markdown_purple {
-  color: purple;
+  color: #EF798A;
 }
 
 .game_markdown_bright_blue_bold {
@@ -64,6 +64,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

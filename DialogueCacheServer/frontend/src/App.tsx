@@ -112,9 +112,9 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
     valueRef.current.value = "";
     console.log("SUBMITTING");
     console.log(valueRef.current.value);
-    const userInputBlock = new ChatBlock();
-    userInputBlock.chatSections.push("> " + command);
-    datastore.addChatBlock(userInputBlock);
+    //const userInputBlock = new ChatBlock();
+    //userInputBlock.chatSections.push("> " + command);
+    //datastore.addChatBlock(userInputBlock);
     setWaitingForAnswer(true);
     fetchPlus(API_SERVER_BASE + "api/handle_input", {
       method: "POST",
@@ -127,6 +127,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       //const responseResults = await value.json();
       console.log(responseResults);
       const chatBlock = createChatBlockFromResponse(responseResults);
+      chatBlock.chatSections.unshift("> " + command)
       datastore.addChatBlock(chatBlock);
       setWaitingForAnswer(false);
     }).catch((reason: any) => {
@@ -154,6 +155,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       const chatBlock = createChatBlockFromResponse(responseResults);
       datastore.newGame(chatBlock);
       setWaitingForAnswer(false);
+      window.scrollTo(0, 0);
     }).catch((reason: any) => {
       console.log("FETCH FAILED");
       console.log(reason);
@@ -164,13 +166,17 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
   }
 
   var counter = 0;
-  const game_text = (<ul>
-    {datastore.blocks.map(chatBlock => {
-      counter += 1;
-      return <div key={counter} dangerouslySetInnerHTML={{ __html: chatBlock.chatSections.join("\n\n") }}></div>
-    })}
-  </ul>
-  );
+  var game_text = null;
+  if (datastore.currentBlock !== null) {
+    game_text = <div key={counter} dangerouslySetInnerHTML={{ __html: datastore.currentBlock.chatSections.join("\n\n") }}></div>;
+  }
+  // const game_text = (<ul>
+  //   {datastore.blocks.map(chatBlock => {
+  //     counter += 1;
+  //     return <div key={counter} dangerouslySetInnerHTML={{ __html: chatBlock.chatSections.join("\n\n") }}></div>
+  //   })}
+  // </ul>
+  // );
 
   var ellipses = null;
 
@@ -212,9 +218,11 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
     )
   }
 
-  var logoStyle = {}
-  if (window.innerWidth >= 900) {
+  var logoStyle;
+  if (false && window.innerWidth >= 900) {
     logoStyle = { position: "absolute", bottom: "0px", width: "100%" };
+  } else {
+    logoStyle = { width: "100%" };
   }
 
   var gameImageHtml = null;
