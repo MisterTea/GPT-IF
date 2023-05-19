@@ -9,19 +9,20 @@ import gptif.settings
 
 DEBUG_INPUT = [
     'ASK Juan "Where are you from?"',  #
-    "L",  #
+    "LOOK AT THE TERMINAL",  #
     '"What are you doing right now?"',  #
     # 3 turns driving
-    "LOOK AT RIVER",  #
-    "LOOK AT THE TERMINAL",  #
+    "LOOK AT THE WINDOW",  #
     "GOAL",  # GOAL does not cost a turn
-    "WAIT",  #
+    "WAIT",  # WAIT should wait for two turns
     # 6 turns driving, at the terminal now
     "watch the television",
     "watch tv",
     "look at the television on the column",
     "look at the desk",
     "sit on the desk",
+    "look at derrick",
+    "look at officer",
     "N",
     'ASK officer "How long were you in the military?"',
     'ASK officer "What was it like serving in Iraq?"',
@@ -44,7 +45,8 @@ DEBUG_INPUT = [
     "U",
     "uP",
     "d",
-    "weSt",
+    "weSt", # Going to your room
+    "\"ocean\"", # Telling the safe the password
     "e",
     "u",
     "u",
@@ -84,6 +86,27 @@ DEBUG_INPUT = [
     # 2 steps until event
     "wait",
     "wait",
+    # Go to gym locker
+    "u",
+    "u",
+    "n",
+    "w",
+    "look at locker",
+    "open the locker",
+    # Go to engine room
+    "e",
+    "s",
+    "d",
+    "d",
+    "d",
+    "d",
+    "d", # In engine room, get cutscene
+    "u",
+    "u",
+    "u",
+    "u",
+    "e",
+    "\"dogfart\"",
 ]
 
 session_id_contextvar = contextvars.ContextVar("session_id", default="")

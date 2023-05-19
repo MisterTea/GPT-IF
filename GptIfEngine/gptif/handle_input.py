@@ -56,6 +56,10 @@ def handle_input(world: World, command: str) -> bool:
 
     if len(command) == 0:
         return True
+    
+    if world.game_over:
+        console.warning("The game is over.  Please restart to play again!")
+        return False
 
     if command[0] == '"':
         # Shortcut for chatting when only one person around
@@ -120,8 +124,13 @@ def handle_input(world: World, command: str) -> bool:
             except ParseException as pe:
                 console.warning(pe)
     elif verb == "WAIT":  # Wait
-        console.print("Time passes...\n", style="yellow")
-        world.step()
+        min_wait_duration = world.min_wait_duration()
+        if min_wait_duration > 0:
+            console.print("Time passes...\n", style="yellow")
+            for x in range(0,min_wait_duration):
+                world.step()
+        else:
+            console.warning("There's no reason to wait")
     elif "37" in verb_classes:  # Tell/Ask
         # Handle speaking
         num_quotes = command_minus_verb.count('"')
@@ -131,12 +140,12 @@ def handle_input(world: World, command: str) -> bool:
             )
             return True
         target_name = command_minus_verb[: command_minus_verb.find('"')].strip()
-        statement = command_minus_verb[command_minus_verb.find('"') - 1 :]
+        statement = command_minus_verb[command_minus_verb.find('"') - 1 :].strip()
 
         target_agent = None
         missing_target_agent = None
         for agent_id, agent in world.agents.items():
-            if target_name.lower() in [x.lower() for x in agent.names]:
+            if agent.answers_to_name(target_name):
                 if (
                     agent_id in world.active_agents
                     and agent.room_id == world.current_room_id
@@ -150,48 +159,66 @@ def handle_input(world: World, command: str) -> bool:
             else:
                 console.warning(f"Sorry, I don't know who {target_name} is.")
         else:
-            answer = converse(target_agent, statement)
-            if answer is not None:
-                console.debug("(RAW ANSWER)", answer)
-                console.print(Markdown("> " + answer.strip('"')))
-                console.print("\n")
+            # Talking to safes are special
+            if target_agent.uid == "vip_room_safe":
+                if statement.strip("\"").lower() == "ocean":
+                    if "VIP Pass" not in world.inventory:
+                        console.print("The safe whirrs as the metal bolt receeds.  The door swings open and you grab the vip pass.  You close the safe and the bolt locks the safe shut.")
+                        world.inventory.append("VIP Pass")
+                    else:
+                        console.print("The safe opens but it is empty")
+                else:
+                    console.print("The safe glows red.  Clearly this isn't the right password.")
+            elif target_agent.uid == "owner_room_safe":
+                if statement.strip("\"").lower() == "dogwhistle":
+                    console.print("(TODO): You win!")
+                    world.game_over = True
+                    return False
+                else:
+                    console.print("The safe glows red.  Clearly this isn't the right password.")
+            else:
+                answer = converse(target_agent, statement)
+                if answer is not None:
+                    console.debug("(RAW ANSWER)", answer)
+                    console.print(Markdown("> " + answer.strip('"')))
+                    console.print("\n")
 
-                if (
-                    len(target_agent.friend_questions) > 0
-                    and target_agent.friend_points < 2
-                ):
-                    is_more_friendly = check_if_more_friendly(
-                        target_agent,
-                        statement,
-                    )
+                    if (
+                        len(target_agent.friend_questions) > 0
+                        and target_agent.friend_points < 2
+                    ):
+                        is_more_friendly = check_if_more_friendly(
+                            target_agent,
+                            statement,
+                        )
 
-                    if is_more_friendly:
-                        target_agent.friend_points += 1
-                        if target_agent.friend_points >= 2:
-                            console.print(
-                                f"[light_green]{target_agent.profile.name} is now your friend!\n[/]"
-                            )
-
-                            if target_agent.uid == "port_security_officer":
+                        if is_more_friendly:
+                            target_agent.friend_points += 1
+                            if target_agent.friend_points >= 2:
                                 console.print(
-                                    Markdown(
-                                        """```You made your first friend! When a character becomes your friend, you can PERSUADE them to do something that they wouldn't do for a stranger.  Go ahead and try it: type PERSUADE DERRICK.```"""
-                                    )
+                                    f"[light_green]{target_agent.profile.name} is now your friend!\n[/]"
                                 )
-                        else:
-                            console.print(
-                                f"[green]{target_agent.profile.name} is more friendly towards you.\n[/]"
-                            )
 
-                            if (
-                                target_agent.friend_points == 1
-                                and target_agent.uid == "port_security_officer"
-                            ):
-                                console.print(
-                                    Markdown(
-                                        """```Good job!  You found out what Derrick likes to talk about and you mentioned it in your conversation.  This earned you a friend point with Derrick.  Friend points persist across playthroughs: once you make a friend, you have a friend for life.  Keep earning friend points to make Derrick a friend```"""
+                                if target_agent.uid == "port_security_officer":
+                                    console.print(
+                                        Markdown(
+                                            """```You made your first friend! When a character becomes your friend, you can PERSUADE them to do something that they wouldn't do for a stranger.  Go ahead and try it: type PERSUADE DERRICK.```"""
+                                        )
                                     )
+                            else:
+                                console.print(
+                                    f"[green]{target_agent.profile.name} is more friendly towards you.\n[/]"
                                 )
+
+                                if (
+                                    target_agent.friend_points == 1
+                                    and target_agent.uid == "port_security_officer"
+                                ):
+                                    console.print(
+                                        Markdown(
+                                            """```Good job!  You found out what Derrick likes to talk about and you mentioned it in your conversation.  This earned you a friend point with Derrick.  Friend points persist across playthroughs: once you make a friend, you have a friend for life.  Keep earning friend points to make Derrick a friend```"""
+                                        )
+                                    )
 
                 world.step()
     elif "58" in verb_classes:  # PERSUADE

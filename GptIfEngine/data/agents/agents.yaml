@@ -434,3 +434,75 @@ captain:
   movement:
     starting_room: vip_lounge
     script_id: captain
+
+vip_room_safe:
+  Profile:
+    name: Your room safe
+    age: 55
+    gender: male
+    occupation: cruise ship captain
+    personality:
+      - calm
+      - collected
+      - experienced
+      - knowledgeable
+      - compassionate
+    backstory:
+      - John grew up in a small town on the coast.
+      - He always loved the water and dreamed of becoming a captain.
+      - He joined the navy after high school and served for 20 years.
+      - After leaving the navy, John went to maritime school and got his captain's license.
+      - He has been working as a cruise ship captain for the past 10 years.
+    physical appearance:
+      - tall
+      - muscular
+      - salt and pepper hair
+      - blue eyes
+    hobbies:
+      - sailing
+      - fishing
+      - spending time with his family
+    goals:
+      - to be the best captain he can be
+      - to provide a safe and enjoyable cruise experience for his passengers
+      - to make a difference in the world
+  aliases:
+    - safe
+  movement:
+    starting_room: my_stateroom
+
+owner_room_safe:
+  Profile:
+    name: James' room safe
+    age: 55
+    gender: male
+    occupation: cruise ship captain
+    personality:
+      - calm
+      - collected
+      - experienced
+      - knowledgeable
+      - compassionate
+    backstory:
+      - John grew up in a small town on the coast.
+      - He always loved the water and dreamed of becoming a captain.
+      - He joined the navy after high school and served for 20 years.
+      - After leaving the navy, John went to maritime school and got his captain's license.
+      - He has been working as a cruise ship captain for the past 10 years.
+    physical appearance:
+      - tall
+      - muscular
+      - salt and pepper hair
+      - blue eyes
+    hobbies:
+      - sailing
+      - fishing
+      - spending time with his family
+    goals:
+      - to be the best captain he can be
+      - to provide a safe and enjoyable cruise experience for his passengers
+      - to make a difference in the world
+  aliases:
+    - safe
+  movement:
+    starting_room: owner_stateroom

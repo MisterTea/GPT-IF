@@ -45,6 +45,18 @@ def put_answer_in_cache(dialogue: db.GptDialogue):
         db.put_answer_in_cache(dialogue)
 
 
+def profile_for_agent(agent:Agent) -> str:
+    return f"""
+**Name:** {agent.profile.name}
+**Age:** {agent.profile.age}
+**Gender:** {agent.profile.gender}
+**Occupation:** {agent.profile.occupation}
+**Personality:** {". ".join(agent.profile.personality)}
+**Backstory:** {". ".join(agent.profile.backstory)}
+**Goals:**   {". ".join(agent.profile.goals)}
+**Notes:**   {". ".join(agent.notes)}
+"""
+
 def converse(target_agent: Agent, statement: str) -> Optional[str]:
     assert llm is not None
 
@@ -54,16 +66,9 @@ def converse(target_agent: Agent, statement: str) -> Optional[str]:
 
     context = f"""Given a character and question, answer the question in a paragraph.
 
-    Character:
+Character:
 
-**Name:** {target_agent.profile.name}
-**Age:** {target_agent.profile.age}
-**Gender:** {target_agent.profile.gender}
-**Occupation:** {target_agent.profile.occupation}
-**Personality:** {". ".join(target_agent.profile.personality)}
-**Backstory:** {". ".join(target_agent.profile.backstory)}
-**Goals:**   {". ".join(target_agent.profile.goals)}
-**Notes:**   {". ".join(target_agent.notes)}
+{profile_for_agent(target_agent)}
 
 Alfred: What is your name?
 {target_agent.profile.name}: \"My name is {target_agent.profile.name}.\"
@@ -164,3 +169,86 @@ No
                 return True
             break
     return False
+
+
+def generate_fake_scenery(
+    scenery_text: str, room_name: str, room_text: str
+) -> Optional[str]:
+    assert llm is not None
+
+    context = f"""Given a room description and an object in the room, describe the object.
+    
+Room Name: {room_name}
+
+Room Description: {room_text}
+    
+Object Name: {scenery_text}
+
+Object Description: """
+
+    dialogue = db.GptDialogue(
+        character_name=None,
+        model_version=llm.model_name(),
+        question=scenery_text,
+        context=context,
+        stop_words=",".join(["?", "\n\n"]),
+    )
+    assert dialogue.stop_words is not None
+
+    cached_answer = get_answer_from_cache(dialogue)
+    if cached_answer is not None:
+        return cached_answer
+    answer = llm.llm(context, stop=dialogue.stop_words.split(","), echo=False)
+    answer_text = answer
+    console.debug("RAW ANSWER", answer_text)
+    put_answer_in_cache(
+        db.GptDialogue(
+            character_name=None,
+            model_version=llm.model_name(),
+            question=scenery_text,
+            context=context,
+            answer=answer_text,
+            stop_words=dialogue.stop_words,
+        )
+    )
+    return answer_text
+
+def describe_character(
+    agent:Agent
+) -> str:
+    assert llm is not None
+
+    question = f"""Given a character profile, write a description of the character
+    
+Character:
+
+{profile_for_agent(agent)}
+
+Description:
+
+"""
+
+    dialogue = db.GptDialogue(
+        character_name=agent.name,
+        model_version=llm.model_name(),
+        question=question,
+        context="",
+    )
+
+    cached_answer = get_answer_from_cache(dialogue)
+    if cached_answer is not None:
+        return cached_answer
+    answer = llm.llm(question, echo=False)
+    answer_text = answer
+    console.debug("RAW ANSWER", answer_text)
+    put_answer_in_cache(
+        db.GptDialogue(
+            character_name=dialogue.character_name,
+            model_version=llm.model_name(),
+            question=question,
+            context="",
+            answer=answer_text,
+            stop_words=dialogue.stop_words,
+        )
+    )
+    return answer_text

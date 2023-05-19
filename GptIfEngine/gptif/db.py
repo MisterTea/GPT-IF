@@ -10,7 +10,7 @@ engine = None
 
 class GptDialogue(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    character_name: str = Field(index=True)
+    character_name: Optional[str] = Field(index=True)
     model_version: Optional[str] = Field(index=True, nullable=False)
     question: str = Field(index=True)
     context: str = Field(index=True)
@@ -56,14 +56,23 @@ def create_db_and_tables():
 
 def get_answer_if_cached(dialogue: GptDialogue) -> Optional[str]:
     with Session(engine) as session:
-        statement = (
-            select(GptDialogue)
-            .where(GptDialogue.character_name == dialogue.character_name)
-            .where(GptDialogue.model_version == dialogue.model_version)
-            .where(GptDialogue.question == dialogue.question)
-            .where(GptDialogue.context == dialogue.context)
-            .where(GptDialogue.stop_words == dialogue.stop_words)
-        )
+        if dialogue.stop_words is None:
+            statement = (
+                select(GptDialogue)
+                .where(GptDialogue.character_name == dialogue.character_name)
+                .where(GptDialogue.model_version == dialogue.model_version)
+                .where(GptDialogue.question == dialogue.question)
+                .where(GptDialogue.context == dialogue.context)
+            )
+        else:
+            statement = (
+                select(GptDialogue)
+                .where(GptDialogue.character_name == dialogue.character_name)
+                .where(GptDialogue.model_version == dialogue.model_version)
+                .where(GptDialogue.question == dialogue.question)
+                .where(GptDialogue.context == dialogue.context)
+                .where(GptDialogue.stop_words == dialogue.stop_words)
+            )
         results = list(session.exec(statement))
         if len(results) == 0:
             return None

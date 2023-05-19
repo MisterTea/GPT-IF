@@ -9,6 +9,7 @@ RUN_LOCALLY = True
 CONVERSE_SERVER: Optional[str] = None
 DEBUG_MODE = False
 CLI_MODE = False
+FAKE_SCENERY = True
 
 if "SQL_URL" not in os.environ:
     os.environ["SQL_URL"] = "sqlite:///~/.gptif"

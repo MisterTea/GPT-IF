@@ -28,10 +28,15 @@ def flatten(xs):
 # nltk.download("verbnet")
 
 nlp = None
-if "STAGE" in os.environ:
-    nlp = spacy.load(f"/var/task/en_core_web_sm/en_core_web_sm-3.5.0")
-else:
-    nlp = spacy.load("en_core_web_sm")
+
+
+def init_nlp():
+    global nlp
+    if nlp is None:
+        if "STAGE" in os.environ:
+            nlp = spacy.load(f"/var/task/en_core_web_sm/en_core_web_sm-3.5.0")
+        else:
+            nlp = spacy.load("en_core_web_sm")
 
 
 class ParseException(Exception):
@@ -60,8 +65,7 @@ def get_verb_classes_for_list(verbs: Iterable[str]) -> Set[str]:
 
 def handle_user_input(user_input: str):
     global nlp
-    if nlp is None:
-        nlp = spacy.load("en_core_web_sm")
+    init_nlp()
 
     user_input_tokens = word_tokenize(user_input)
 
@@ -226,6 +230,7 @@ def handle_user_input(user_input: str):
 
 def get_direct_object(command: str) -> str:
     global nlp
+    init_nlp()
     # user_input_tokens = word_tokenize(user_input)
 
     doc = nlp(command)
@@ -245,7 +250,7 @@ def get_direct_object(command: str) -> str:
         #     list(token.children),
         #     list(token.ancestors),
         # )
-        pos_tags.append((token.text, token.tag_))
+        pos_tags.append((token.text, token.tag_, token.dep_))
 
     if len(list(doc[0].ancestors)) > 0 or doc[0].tag_[:2] != "VB":
         raise ParseException(
@@ -253,18 +258,22 @@ def get_direct_object(command: str) -> str:
         )
     verb = doc[0].text
 
-    # Pick the first pobj or dobj to be the sentence object
-    def is_sentence_object(token):
-        return token.dep_ == "pobj" or token.dep_ == "dobj" or token.dep == nsubj
+    direct_object = None
+    for i, token in enumerate(doc):
+        if token.dep_ == "pobj" or token.dep_ == "dobj" or token.dep == nsubj:
+            direct_object = token.text
+            # Add compound prefix
+            while i > 0 and doc[i - 1].dep_ == "compound":
+                direct_object = doc[i - 1].text + " " + direct_object
+                i -= 1
+            break
 
-    sentence_object_nouns = list(filter(is_sentence_object, doc))
-
-    if len(sentence_object_nouns) == 0:
+    if direct_object is None:
         raise ParseException(
             f'({command}) invalid: {verb} is transitive and requires an object (for example, "STAND (ON THE CHAIR)").'
         )
 
-    return sentence_object_nouns[0].text
+    return direct_object
 
 
 def get_hypernyms(s: str):

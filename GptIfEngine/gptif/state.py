@@ -124,6 +124,9 @@ class Agent:
     def name(self) -> str:
         return self.profile.name
 
+    def answers_to_name(self, name:str) -> bool:
+        return name.lower() in [x.lower() for x in self.names]
+
 
 @dataclass
 class Scenery:
@@ -141,6 +144,7 @@ class Scenery:
 @dataclass
 class Exit:
     room_uid: str
+    visible: Optional[str]
     prescript: Optional[str]
     postscript: Optional[str]
 
@@ -169,9 +173,10 @@ class World:
     visited_rooms: Set[str] = field(default_factory=set)
     on_chapter: int = 0
     time_in_chapter: int = 0
-    has_keycard: bool = False
+    inventory: List[str] = field(default_factory=list)
+    game_over: bool = False
 
-    version: int = 1
+    version: int = 2
 
     random: random.Random = field(default_factory=random.Random)
 
@@ -209,6 +214,7 @@ class World:
                     for exit_direction, exit in room_yaml["exits"].items():
                         exits[exit_direction] = Exit(
                             exit["room"],
+                            exit.get("visible", None),
                             exit.get("prescript", None),
                             exit.get("postscript", None),
                         )
@@ -281,7 +287,7 @@ class World:
             "visited_rooms": list(sorted(self.visited_rooms)),
             "on_chapter": self.on_chapter,
             "time_in_chapter": self.time_in_chapter,
-            "has_keycard": self.has_keycard,
+            "inventory": self.inventory,
             "version": self.version,
         }
         agent_states = {}
@@ -347,6 +353,21 @@ class World:
     def current_room(self):
         return self.rooms[self.current_room_id]
 
+    def min_wait_duration(self) -> int:
+        wait_duration:Optional[int] = None
+
+        for description in self.current_room.descriptions.keys():
+            if description.startswith("Tic"):
+                tic_time = int(description.split(" ")[1])
+                if self.time_in_room < tic_time:
+                    time_to_wait = tic_time - self.time_in_room
+                    if wait_duration is None or time_to_wait < wait_duration:
+                        wait_duration = time_to_wait
+
+        if wait_duration is None:
+            return 1
+        return wait_duration        
+
     def step(self):
         self.time_in_room += 1
         self.time_in_chapter += 1
@@ -406,6 +427,20 @@ After a few moments, the short conversation is over and June turns back to face 
         else:
             self.visited_rooms.add(room_id)
             self.look()
+        
+    def parse(self, text):
+        result = jinja2.Environment().from_string(text).render(world=self)
+        # Extract tokens
+        tokens = []
+
+        def replace_tokens(matchobj):
+            tokens.append(matchobj.group(1))
+            return ""
+
+        result_without_tokens = re.sub(r"%%(.*?)%%", replace_tokens, result, 0)
+
+        return result_without_tokens, tokens
+
 
     def go(self, direction):
         direction = direction.lower()
@@ -420,16 +455,11 @@ After a few moments, the short conversation is over and June turns back to face 
                 )
                 return False
         exit = self.current_room.exits[direction]
+        if not self.exit_visible(exit):
+            console.warning("You can't go that way.")
+            return False
         if exit.prescript is not None:
-            result = jinja2.Environment().from_string(exit.prescript).render(world=self)
-            # Extract tokens
-            tokens = []
-
-            def replace_tokens(matchobj):
-                tokens.append(matchobj.group(1))
-                return ""
-
-            result_without_tokens = re.sub(r"%%(.*?)%%", replace_tokens, result, 0)
+            result_without_tokens, tokens = self.parse(exit.prescript)
 
             if len(result_without_tokens) > 0:
                 self.play_sections(result_without_tokens.split("\n\n"))
@@ -437,7 +467,7 @@ After a few moments, the short conversation is over and June turns back to face 
                 return False
         self.move_to(exit.room_uid)
         if exit.postscript is not None:
-            jinja2.Environment().from_string(exit.postscript).render(world=self)
+            self.parse(exit.postscript)
         return True
 
     def send_agent(self, agent: Agent, direction: str):
@@ -475,6 +505,8 @@ After a few moments, the short conversation is over and June turns back to face 
         if self.on_chapter == 2:
             if "my_stateroom" not in world.visited_rooms:
                 return "Exploring the Fortuna"
+            elif "VIP Pass" not in world.inventory:
+                return "Opening my safe"
             elif world.current_room_id != "vip_lounge":
                 return "Making my way to the VIP Room"
             else:
@@ -482,7 +514,16 @@ After a few moments, the short conversation is over and June turns back to face 
         if self.on_chapter < 5:
             return "Looking around and chatting on the VIP Tour."
         if self.on_chapter == 5:
-            return "Looking for an officer keycard"
+            if "keycard" in self.inventory:
+                return "Going to the engine room"
+            else:
+                return "Looking for an officer keycard"
+        if self.on_chapter == 6:
+            if "owner_stateroom" not in world.visited_rooms:
+                return "Going to James Carrington's VIP room"
+            else:
+                return "Solving James Carrington's Safe Puzzle"
+
         return None
 
     def print_goal(self):
@@ -499,10 +540,22 @@ After a few moments, the short conversation is over and June turns back to face 
         self.print_agents()
         self.print_exits()
 
+    def exit_visible(self, exit):
+        if exit.visible is not None:
+            result_without_tokens, tokens = self.parse(exit.visible)
+
+            if "False" in tokens:
+                return False
+        return True
+
     def print_exits(self):
+        def pass_visible_test(direction_exit_pair:Tuple[str, Exit]):
+            exit = direction_exit_pair[1]
+            return self.exit_visible(exit)
+
         exit_text = [
             f"* {direction}: **{self.rooms[exit.room_uid].title}**"
-            for direction, exit in self.current_room.exits.items()
+            for direction, exit in filter(pass_visible_test, self.current_room.exits.items())
         ]
         if len(exit_text) == 0:
             return
@@ -526,11 +579,24 @@ After a few moments, the short conversation is over and June turns back to face 
         console.print()
 
     def act_on(self, verb: str, look_object: str) -> bool:
-        hypernyms_set = get_hypernyms_set(look_object)
+        from gptif.converse import describe_character
+
+        look_object_root = look_object.split(" ")[-1]
+
+        # Check if we are looking at a person
+        for agent in self.agents_in_room:
+            if agent.answers_to_name(look_object_root):
+                if agent.room_id == self.current_room_id:
+                    description = describe_character(agent)
+                    self.play_sections([description])
+                    return True
+
+        hypernyms_set = get_hypernyms_set(look_object_root)
         # Loop through all scenery in the room, looking for a match
         for scenery in self.current_room.scenery:
             if (
                 look_object.lower() in scenery.names
+                or look_object_root.lower() in scenery.names
                 or len(scenery.names.intersection(hypernyms_set)) > 0
             ):
                 # Got a match
@@ -548,13 +614,25 @@ After a few moments, the short conversation is over and June turns back to face 
                     if verb == "look":
                         display_image_for_prompt(scenery.actions[scenery_action][0])
                     return True
+
+        if verb == "look" and gptif.settings.FAKE_SCENERY:
+            from gptif.converse import generate_fake_scenery
+
+            fake_scenery = generate_fake_scenery(
+                look_object,
+                self.current_room.title,
+                self.current_room.descriptions["Long"],
+            )
+            if fake_scenery is not None:
+                self.play_sections([fake_scenery])
+                return True
         return False
 
     def play_sections(
         self, sections: List[str], style: Optional[str] = None, markdown: bool = True
     ):
         for section in sections:
-            paragraph = jinja2.Environment().from_string(section).render(world=self)
+            paragraph, tokens = self.parse(section)
             if len(paragraph) > 0 and paragraph != "None":
                 if markdown:
                     console.print(Markdown(paragraph), style=style)
@@ -595,7 +673,10 @@ Derrick quickly scans your paperwork and hands you your room key.
             self.play_sections(sections)
 
     def start_ch2(self):
-        self.active_agents = set()
+        self.active_agents = set([
+            "vip_room_safe",
+            "owner_room_safe",
+        ])
         self.on_chapter = 2
         self.time_in_chapter = 0
 
@@ -604,7 +685,7 @@ Derrick quickly scans your paperwork and hands you your room key.
             self.play_sections(sections)
 
     def start_ch3(self):
-        self.active_agents = set(
+        self.active_agents.update(
             [
                 "tour_guide",
                 "vip_reporter",
@@ -639,6 +720,14 @@ Derrick quickly scans your paperwork and hands you your room key.
         self.agents["ex_convict"].room_id = "gym"
         self.agents["research_scientist"].room_id = "theater"
         self.agents["tour_guide"].room_id = None
+
+    def start_ch6(self):
+        self.on_chapter = 6
+        self.time_in_chapter = 0
+
+        with open("data/start_ch6.md", "r") as fp:
+            sections = fp.read().split("\n\n")
+            self.play_sections(sections)
 
     def check_can_board_ship(self):
         if self.agents["port_security_officer"].friend_points >= 2:

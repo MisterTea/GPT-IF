@@ -52,6 +52,10 @@ stateroom_deck:
       prescript: You hustle down several flights of stairs, careful not to fall over.
     west:
       room: my_stateroom
+    east:
+      room: owner_stateroom
+      visible: |
+        {% if world.on_chapter == 6 %}%%True%%{% else %}%%False%%{% endif %}
     up:
       room: pool_deck
       prescript: A blast of windy, open air assaults you as the automatic doors slide open.
@@ -64,11 +68,10 @@ pool_deck:
     up:
       room: vip_lounge
       prescript: |
-        {% if "my_stateroom" not in world.visited_rooms %}
-        You start to head to the VIP safety drill, but then remember that this may be the last time in a while that you will be able to check out your new room!  You simply **must** visit your stateroom first.%%False%%
+        {% if "VIP Pass" not in world.inventory %}
+        %%False%%You swipe your guest pass over the door scanner to no avail.  You smack yourself in the head.  Of course!  Your VIP pass is in the safe in your room.  The password is 'ocean'.
         {% else %}
-        %%True%%
-        {% if world.on_chapter == 2 %}%%{{world.start_ch3()}}%%{% endif %}{% endif %}
+        %%True%%{% if world.on_chapter == 2 %}%%{{world.start_ch3()}}%%{% endif %}{% endif %}
     north:
       room: gym
 
@@ -114,10 +117,10 @@ medical_and_crew:
     down:
       room: engine_room
       prescript: |
-        {% if world.has_keycard == False %}
+        {% if "keycard" not in world.inventory %}
         %%False%%A steel door blocks your path.  Only engine crew and ship officers are allowed past that point.
         {% else %}
-        %%True%%
+        %%True%%{% if world.on_chapter == 5 %}%%{{world.start_ch6()}}%%{% endif %}
         {% endif %}
     up:
       room: promenade
@@ -142,3 +145,9 @@ engine_room:
 
 treading_water:
   title: Treading water in the Gulf of Mexico
+
+owner_stateroom:
+  title: James Carrington's stateroom
+  exits:
+    west:
+      room: stateroom_deck

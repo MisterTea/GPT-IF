@@ -1,30 +1,16 @@
 import { ArrowForwardIos } from '@mui/icons-material';
-import { Alert, AlertColor, AlertTitle, Grid } from '@mui/material';
+import { Alert, AlertColor, AlertTitle, Grid, Pagination } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import { observer } from "mobx-react";
-import { KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 //import rehypeRaw from 'rehype-raw';
 //import remarkDirective from 'remark-directive';
 //import remarkGfm from 'remark-gfm';
-import { Marked } from '@ts-stack/markdown';
 import './App.css';
-import DataStore, { ChatBlock } from './datastore';
 import ReactAnimatedEllipsis from './ReactAnimatedEllipses';
-
-var API_SERVER_BASE: string = "/";
-if (window.location.hostname.endsWith("amazonaws.com")) {
-  API_SERVER_BASE = "https://90rjg2sbkg.execute-api.us-east-1.amazonaws.com/dev/";
-}
-
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-  },
-});
+import DataStore from './datastore';
 
 interface GptifAlert {
   message: string;
@@ -33,27 +19,63 @@ interface GptifAlert {
   duration: number;
 }
 
-const fetchPlus = (url: string, options = {}, retries: number): Promise<any> =>
-  fetch(url, options)
-    .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-      if (retries > 0) {
-        return fetchPlus(url, options, retries - 1);
-      }
-      throw new Error(res.status.toString());
-    })
-    .catch(error => {
-      throw error;
-    });
-
 const App = observer(({ datastore }: { datastore: DataStore }) => {
-  const valueRef: React.MutableRefObject<any> = useRef('') //creating a refernce for TextField Component
+  const commandValueRef: React.MutableRefObject<any> = useRef(''); //creating a refernce for TextField Component
+  const commandRef: React.MutableRefObject<any> = useRef(null); //creating a refernce for TextField Component
 
   const [waitingForAnswer, setWaitingForAnswer] = useState<boolean>(false);
-  const [gameImage, setGameImage] = useState<string | null>(null);
   const [alerts, setAlerts] = useState<GptifAlert[]>([]);
+
+  function getFocusSoon() {
+    setTimeout(() => {
+      commandValueRef.current.focus();
+    }, 50);
+  }
+
+  function submitCommand(command: string) {
+    setWaitingForAnswer(true);
+    datastore.submitCommand(command).then(() => {
+      console.log("CLEARING");
+      commandValueRef.current.value = "";
+      setWaitingForAnswer(false);
+      getFocusSoon();
+    }).catch((reason: any) => {
+      console.log("FETCH FAILED");
+      console.log(reason);
+      setWaitingForAnswer(false);
+      console.log(commandValueRef.current);
+      getFocusSoon();
+      const newAlert: GptifAlert = { message: "Could not send command: " + reason, duration: 5, title: "Command failed", severity: "error" };
+      setAlerts([...alerts, newAlert]);
+    })
+  }
+
+  function submitIfEnter(e: KeyboardEvent) {
+    if (e.key === "Enter") {
+      const command = commandValueRef.current.value;
+      //if (command.length === 0)
+      //return;
+      console.log("SUBMITTING");
+      console.log(commandValueRef.current.value);
+      submitCommand(command);
+    }
+  }
+
+  const submitNewGame = useCallback(() => {
+    console.log("STARTING NEW GAME");
+    setWaitingForAnswer(true);
+    datastore.submitNewGame().then(() => {
+      setWaitingForAnswer(false);
+      window.scrollTo(0, 0);
+      getFocusSoon();
+    }).catch((reason: any) => {
+      console.log("FETCH FAILED");
+      console.log(reason);
+      setWaitingForAnswer(false);
+      const newAlert: GptifAlert = { message: "Could not start the game: " + reason, duration: 5, title: "Can't start game", severity: "error" };
+      setAlerts([...alerts, newAlert]);
+    });
+  }, [datastore, alerts]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -70,105 +92,26 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [alerts, setAlerts]);
-
-  function createChatBlockFromResponse(responseResults: any[]) {
-    const chatBlock = new ChatBlock();
-    const chatSections = responseResults.map((responseResult: any[]) => {
-      var responseText = responseResult[0];
-      if (responseResult[1] !== null) {
-        //const colorHtmlMap = new Map<string, string[]>();
-        //colorHtmlMap.set("yellow", ["<span style=\"color:yellow\">", "</span>"]);
-        //const htmlResult: string[] | undefined = colorHtmlMap.get(responseResult[1]);
-        //if (htmlResult === undefined) {
-        //throw "Oops: " + responseResult[1];
-        //}
-        responseText = "[" + responseResult[1] + "]" + responseText + "[/]";
-      }
-
-      // Replace rich tags with spans
-      const acceptedTags = ["yellow", "blue", "bright_blue bold", "yellow bold", "purple", "green", "light_green", "red on black"]
-      responseText = responseText.replaceAll("[/]", "</span>")
-      acceptedTags.forEach(acceptedTag => {
-        responseText = responseText.replaceAll("[" + acceptedTag + "]", "<span class=\"game_markdown_" + acceptedTag.replaceAll(" ", "_") + "\">")
-      });
-      if (responseText.includes("%%IMAGE%%")) {
-        const image_id = responseText.split(" ")[1];
-        const image_url = API_SERVER_BASE + "api/ai_image/" + image_id;
-        console.log("GOT IMAGE: " + image_url);
-        setGameImage(image_url);
-        return null;
-      }
-      return Marked.parse(responseText);
-    }).filter(response => response !== null) as string[];
-    chatBlock.chatSections = chatSections;
-    return chatBlock;
-  }
-
-  function submit_command() {
-    const command = valueRef.current.value;
-    //if (command.length === 0)
-    //return;
-    valueRef.current.value = "";
-    console.log("SUBMITTING");
-    console.log(valueRef.current.value);
-    //const userInputBlock = new ChatBlock();
-    //userInputBlock.chatSections.push("> " + command);
-    //datastore.addChatBlock(userInputBlock);
-    setWaitingForAnswer(true);
-    fetchPlus(API_SERVER_BASE + "api/handle_input", {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ "command": command }),
-      credentials: 'include',
-    }, 3).then((responseResults: any[]) => {
-      //const responseResults = await value.json();
-      console.log(responseResults);
-      const chatBlock = createChatBlockFromResponse(responseResults);
-      chatBlock.chatSections.unshift("> " + command)
-      datastore.addChatBlock(chatBlock);
-      setWaitingForAnswer(false);
-    }).catch((reason: any) => {
-      console.log("FETCH FAILED");
-      console.log(reason);
-      setWaitingForAnswer(false);
-      const newAlert: GptifAlert = { message: "Could not send command: " + reason, duration: 5, title: "Command failed", severity: "error" };
-      setAlerts([...alerts, newAlert]);
-    })
-  }
-
-  function submitIfEnter(e: KeyboardEvent) {
-    if (e.key === "Enter") {
-      submit_command();
-    }
-  }
-
-  function submit_new_game() {
-    console.log("STARTING NEW GAME");
-    setWaitingForAnswer(true);
-    fetchPlus(API_SERVER_BASE + "api/begin_game", {
-      method: "POST",
-      credentials: 'include',
-    }, 3).then((responseResults: any[]) => {
-      const chatBlock = createChatBlockFromResponse(responseResults);
-      datastore.newGame(chatBlock);
-      setWaitingForAnswer(false);
-      window.scrollTo(0, 0);
-    }).catch((reason: any) => {
-      console.log("FETCH FAILED");
-      console.log(reason);
-      setWaitingForAnswer(false);
-      const newAlert: GptifAlert = { message: "Could not start the game: " + reason, duration: 5, title: "Can't start game", severity: "error" };
-      setAlerts([...alerts, newAlert]);
-    });
-  }
+  }, [alerts, setAlerts, submitNewGame]);
 
   var counter = 0;
   var game_text = null;
   if (datastore.currentBlock !== null) {
-    game_text = <div key={counter} dangerouslySetInnerHTML={{ __html: datastore.currentBlock.chatSections.join("\n\n") }}></div>;
+    var pagination = null;
+    if (datastore.blocks.length > 1) {
+      const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+        datastore.goToPage(value - 1);
+      };
+
+      pagination = <Pagination count={datastore.blocks.length} shape="rounded" size="small" page={datastore.currentBlockIndex + 1} onChange={handlePageChange} />;
+    }
+
+    game_text = (
+      <div>
+        {pagination}
+        <div key={counter} dangerouslySetInnerHTML={{ __html: datastore.currentBlock.chatSections.join("\n\n") }}></div>
+      </div>
+    );
   }
   // const game_text = (<ul>
   //   {datastore.blocks.map(chatBlock => {
@@ -179,26 +122,49 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
   // );
 
   var ellipses = null;
-
-  if (waitingForAnswer) {
+  var commandBox = null;
+  if (datastore.blocks.length > 0) {
+    var showReturnButton = false;
+    var showCommandBox = false;
+    if (waitingForAnswer) {
+    } else {
+      if (datastore.currentBlockIndex !== datastore.blocks.length - 1) {
+        showCommandBox = false;
+        showReturnButton = true;
+      } else {
+        showCommandBox = true;
+      }
+    }
+    commandBox = (
+      <div>
+        <Button variant="contained" style={{ visibility: (showReturnButton ? 'visible' : 'hidden') }} onClick={() => {
+          datastore.goToLastPage();
+        }}>
+          Return to current scene
+        </Button>
+        <Box sx={{ display: 'flex', p: 1 }} style={{ visibility: (showCommandBox ? 'visible' : 'hidden') }}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1 }}>
+            <ArrowForwardIos sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
+            <TextField id="input-with-sx" label="Tap/Click here" variant="standard" fullWidth onKeyDown={submitIfEnter} inputRef={commandValueRef} ref={commandRef} autoComplete="off" />
+          </Box>
+          <Button variant="contained" onClick={() => {
+            const command = commandValueRef.current.value;
+            //if (command.length === 0)
+            //return;
+            console.log("SUBMITTING");
+            console.log(commandValueRef.current.value);
+            submitCommand(command);
+          }}>Submit</Button>
+        </Box>
+      </div>
+    );
+  }
+  if (waitingForAnswer || datastore.blocks.length === 0) {
     ellipses = (
       <ReactAnimatedEllipsis
         fontSize="3rem"
         marginLeft="5px"
         spacing="0.3rem" />
-    );
-  }
-
-  var commandBox = null;
-  if (!waitingForAnswer && datastore.blocks.length > 0) {
-    commandBox = (
-      <Box sx={{ display: 'flex', p: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1 }}>
-          <ArrowForwardIos sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
-          <TextField id="input-with-sx" label="Tap/Click here" variant="standard" fullWidth onKeyDown={submitIfEnter} inputRef={valueRef} autoComplete="off" />
-        </Box>
-        <Button variant="contained" onClick={submit_command}>Submit</Button>
-      </Box>
     );
   }
 
@@ -226,33 +192,29 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
   }
 
   var gameImageHtml = null;
-  if (gameImage !== null) {
-    gameImageHtml = <img src={gameImage} alt="Logo" style={logoStyle} />;
+  if (datastore.gameImageUrl !== null) {
+    gameImageHtml = <img src={datastore.gameImageUrl} alt="Logo" style={logoStyle} />;
   }
 
   return (
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      <div className="App">
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6} style={{ whiteSpace: "normal" }}>
-            {game_text}
-            {ellipses}
-            {alertHtml}
-            {commandBox}
-          </Grid>
-          <Grid item xs={12} md={6} style={{ position: "relative", minHeight: "400px" }}>
-            {gameImageHtml}
-          </Grid>
-          <Grid item xs={12}>
-            <div>
-              <Button variant="contained" onClick={submit_new_game}>{datastore.blocks.length === 0 ? "Start Game" : "Restart Game"}</Button>
-            </div>
-          </Grid>
+    <div className="App">
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={6} style={{ whiteSpace: "normal" }}>
+          {game_text}
+          {ellipses}
+          {alertHtml}
+          {commandBox}
         </Grid>
-      </div>
-    </ThemeProvider>
-
+        <Grid item xs={12} md={6} style={{ position: "relative", minHeight: "400px" }}>
+          {gameImageHtml}
+        </Grid>
+        <Grid item xs={12}>
+          <div>
+            {datastore.blocks.length > 0 && <Button variant="contained" onClick={submitNewGame}>{datastore.blocks.length === 0 ? "Start Game" : "Restart Game"}</Button>}
+          </div>
+        </Grid>
+      </Grid>
+    </div>
   );
 });
 

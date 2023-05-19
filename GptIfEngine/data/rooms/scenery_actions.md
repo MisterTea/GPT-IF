@@ -141,3 +141,13 @@ You step into the grand atrium of the cruise ship, and you are immediately struc
 The fountain is surrounded by a walkway, and you can walk around it to get a closer look. The water is clear and blue, and you can see fish swimming around in it. The fountain is also surrounded by flowers, which add to its beauty.
 
 You stand for a moment, enjoying the peace and tranquility of the fountain. It is a welcome respite from the hustle and bustle of the ship. You take a deep breath of the fresh air, and you feel your stress start to melt away.
+
+# gym_locker
+
+## look
+
+The gym locker is a small, secure storage space that is typically found in a gym or fitness center. It is typically made of metal and has a combination lock, which allows you to keep your belongings safe while you are working out. Gym lockers are typically about 2 feet wide, 3 feet tall, and 1 foot deep, and they can be used to store a variety of items, such as clothes, shoes, towels, and gym bags.  Most lockers have a pad lock, but one locker looks like it can be OPENED.
+
+## open
+
+{% if "keycard" not in world.inventory%}You open the locker and find an officer uniform and keycard.  You quickly pocket the keycard.%%{{ world.inventory.append("keycard") }}%%{% else %}You open the locker another time just to make sure you didn't miss anything{% endif %}

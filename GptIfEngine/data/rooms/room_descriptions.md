@@ -4,8 +4,10 @@
 
 It's a beautiful day in Tampa, and you're excited to be taking a taxi to the cruise terminal. As you ride, you look out the window and see the cityscape passing by. You pass by tall buildings, busy streets, and parks. You can see the Hillsborough River in the distance.
 
+## Tic 2
+
 ```
-If you haven't yet, try LOOKing at anything highlighted in bold.  For example, you can LOOK AT THE TERMINAL.
+If you haven't yet, try LOOKing at something.  For example, you can LOOK AT THE TERMINAL.  Things that are of particular interest are highlighted in **bold**, but you can look at anything!
 ```
 
 ## Tic 3
@@ -92,9 +94,29 @@ The stateroom is decorated in a nautical style with blue and white accents. The 
 
 The stateroom is very clean and well-maintained. It is the perfect place to relax and unwind after a long day of exploring the ship or the ports of call.
 
+Your safe happily buzzes as a security question scrolls on the 7-segment display: **YOUR SECURITY HINT IS: I AM ALWAYS MOVING BUT NEVER GET ANYWHERE.  PLEASE TELL ME THE PASSWORD**
+
 ## Short
 
 Your spacious and comfortable stateroom is the perfect place to relax and unwind after a long day of exploring.
+
+Your safe happily buzzes as a security question scrolls on the 7-segment display: **YOUR SECURITY HINT IS: I AM ALWAYS MOVING BUT NEVER GET ANYWHERE.  PLEASE TELL ME THE PASSWORD**
+
+# owner_stateroom
+
+## Long
+
+You step into the luxurious suite and are immediately struck by the sense of space and opulence. The room is large and airy, with high ceilings and large windows that let in plenty of natural light. The walls are decorated in a tasteful neutral color scheme, and the furniture is upholstered in soft, luxurious fabrics.
+
+The suite is divided into several different areas, each with its own unique purpose. There is a living room with a comfortable sofa, a coffee table, and a flat-screen TV. There is also a dining room with a table that can seat up to six people. And there is a bedroom with a king-size bed, a walk-in closet, and a private bathroom.
+
+The suite also has a number of amenities that make it feel like a home away from home. There is a fully stocked minibar, a coffee maker, and a microwave. There is also a safe and a hairdryer.  The safe attracts your attention.
+
+The safe happily buzzes as a security question scrolls on the 7-segment display: **YOUR SECURITY HINT IS: EVERY LETTER IN IT'S PLACE.  PLEASE TELL ME THE PASSWORD**
+
+## Short
+
+James Carrington's stateroom is a spacious, opulent suite with stunning views of the ocean.  A safe in this room attracts your attention. The safe happily buzzes as a security question scrolls on the 7-segment display: **YOUR SECURITY HINT IS: EVERY LETTER IN IT'S PLACE.  PLEASE TELL ME THE PASSWORD**
 
 # theater
 

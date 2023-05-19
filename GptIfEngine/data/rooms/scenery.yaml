@@ -109,3 +109,13 @@ atrium_fountain:
     - fountain.n.01
   rooms:
     - atrium
+
+gym_locker:
+  hints:
+    - locker
+  names:
+    - container.n.01
+    - locker.n.02
+    - cabinet.n.03
+  rooms:
+    - gym_locker_room

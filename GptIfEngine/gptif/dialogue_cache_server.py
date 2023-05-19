@@ -265,10 +265,10 @@ async def handle_input(
     game_state = get_game_state_from_id(session_id)
     assert game_state is not None, "Missing game state"
     if not world.load(game_state):
-        assert False
-        # raise HTTPException(status_code=400, detail="Incompatible world version")
+        gptif.console.console.print("(Incompatible save detected, starting a new game...)")
         world.start_chapter_one()
-    gptif.handle_input.handle_input(world, command.command)
+    else:
+        gptif.handle_input.handle_input(world, command.command)
     world.save(game_state)
     upsert_game_state(game_state)
     response = JSONResponse(content=gptif.console.console.buffers.get(session_id, []))

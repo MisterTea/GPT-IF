@@ -1,5 +1,6 @@
 import multiprocessing
 import os
+import time
 from typing import List, Optional
 
 import requests
@@ -58,19 +59,29 @@ class OpenAiLanguageModel:
     def model_name(self):
         return "gpt-3.5-turbo"
 
-    def llm(self, question: str, stop: List[str] = [], echo: bool = False) -> str:
+    def llm(self, question: str, stop: Optional[List[str]] = None, echo: bool = False) -> str:
         import openai
 
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
-        response = openai.ChatCompletion.create(
-            model=self.model_name(),
-            messages=[
-                {"role": "user", "content": question},
-            ],
-            stop=stop,
-        )
-        return response["choices"][0]["message"]["content"]
+        if stop is not None and len(stop) == 0:
+            stop = None
+
+        for x in range(0, 5):
+            try:
+                response = openai.ChatCompletion.create(
+                    model=self.model_name(),
+                    messages=[
+                        {"role": "user", "content": question},
+                    ],
+                    stop=stop,
+                )
+                return response["choices"][0]["message"]["content"]
+            except openai.error.RateLimitError as ex:
+                console.debug("Rate limit error: " + str(ex))
+                time.sleep(5.0)
+        raise Exception("OpenAI Rate Limit 5 times")
+
 
 
 def download_file(url):
