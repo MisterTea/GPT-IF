@@ -41,11 +41,13 @@ from gptif.db import (
     AiImage,
     GameState,
     GptDialogue,
+    add_feedback,
     create_db_and_tables,
     get_ai_image_from_id,
     get_ai_image_if_cached,
     get_answer_if_cached,
     get_game_state_from_id,
+    push_game_command,
     put_ai_image_in_cache,
     put_answer_in_cache,
     upsert_game_state,
@@ -118,6 +120,10 @@ secret_box = nacl.secret.SecretBox(secret_key)
 
 class GameCommand(BaseModel):
     command: str
+
+
+class GameFeedback(BaseModel):
+    feedback: str
 
 
 @app.on_event("startup")
@@ -263,7 +269,7 @@ async def handle_input(
 
     world = World()
     game_state = get_game_state_from_id(session_id)
-    logger.info(f"SESSION ID {session_id}")
+    logger.info(f"GAME COMMAND: {command.command}")
     if game_state is None:
         # Game was deleted
         gptif.console.console.print("(Server gamefile missing, starting a new game...)")
@@ -275,7 +281,20 @@ async def handle_input(
         )
         world.start_chapter_one()
     else:
+        import cProfile, pstats, io
+        from pstats import SortKey
+
+        pr = cProfile.Profile()
+        pr.enable()
         gptif.handle_input.handle_input(world, command.command)
+        pr.disable()
+        s = io.StringIO()
+        sortby = SortKey.TIME
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats(5)
+        print(s.getvalue())
+        logger.info("COMMAND HANDLED")
+        push_game_command(session_id, command.command)
     logger.info(f"SESSION ID {session_id}")
     world.save(game_state)
     logger.info(f"SESSION ID {session_id}")
@@ -289,3 +308,11 @@ async def handle_input(
     logger.info(gptif.console.console.buffers.get(session_id, []))
     session_id_contextvar.set("")
     return response
+
+
+@app.post("/api/feedback")
+async def feedback(feedback: GameFeedback, session_id=Depends(fetch_session_id)):
+    print(feedback)
+    print(feedback.feedback)
+    assert feedback.feedback is not None
+    add_feedback(feedback.feedback, session_id)

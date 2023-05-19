@@ -8,6 +8,8 @@ import { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 //import rehypeRaw from 'rehype-raw';
 //import remarkDirective from 'remark-directive';
 //import remarkGfm from 'remark-gfm';
+import * as React from 'react';
+import FadeIn from 'react-fade-in';
 import './App.css';
 import ReactAnimatedEllipsis from './ReactAnimatedEllipses';
 import DataStore from './datastore';
@@ -39,6 +41,9 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       console.log("CLEARING");
       commandValueRef.current.value = "";
       setWaitingForAnswer(false);
+      if (datastore.blocks.length === 3 && !datastore.feedbackModal) {
+        datastore.openFeedback();
+      }
       getFocusSoon();
     }).catch((reason: any) => {
       console.log("FETCH FAILED");
@@ -95,7 +100,6 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
     return () => clearInterval(interval);
   }, [alerts, setAlerts, submitNewGame]);
 
-  var counter = 0;
   var game_text = null;
   if (datastore.currentBlock !== null) {
     var pagination = null;
@@ -110,7 +114,13 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
     game_text = (
       <div>
         {pagination}
-        <div key={counter} dangerouslySetInnerHTML={{ __html: datastore.currentBlock.chatSections.join("\n\n") }}></div>
+        <FadeIn key={"ChatBlock/" + datastore.currentBlockIndex}>
+          {
+            datastore.currentBlock.chatSections.map((chatBlock: string, index: number, array: string[]) => {
+              return <div key={"ChatBlock/" + datastore.currentBlockIndex + "/" + index} dangerouslySetInnerHTML={{ __html: chatBlock }}></div>
+            })
+          }
+        </FadeIn>
       </div>
     );
   }
@@ -146,7 +156,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
         <Box sx={{ display: 'flex', p: 1 }} style={{ visibility: (showCommandBox ? 'visible' : 'hidden') }}>
           <Box sx={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1 }}>
             <ArrowForwardIos sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
-            <TextField id="input-with-sx" label="Tap/Click here" variant="standard" fullWidth onKeyDown={submitIfEnter} inputRef={commandValueRef} ref={commandRef} autoComplete="off" />
+            <TextField id="input-with-sx" label="Tap/Click here" variant="standard" fullWidth multiline onKeyDown={submitIfEnter} inputRef={commandValueRef} ref={commandRef} autoComplete="off" style={{ paddingRight: "10px" }} />
           </Box>
           <Button variant="contained" onClick={() => {
             const command = commandValueRef.current.value;

@@ -12,6 +12,7 @@ if __name__ == "__main__":
         response = s.post(
             "http://localhost:8000/api/handle_input", json={"command": command}
         )
+        assert response.status_code == 200
         print(response)
         print(response.content)
         print(s.cookies["session_cookie"])

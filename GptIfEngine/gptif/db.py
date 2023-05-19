@@ -1,7 +1,7 @@
 import os
 from typing import List, Optional
 
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from sqlmodel import Field, Session, SQLModel, create_engine, select, func
 
 from gptif.console import console
 
@@ -26,11 +26,24 @@ class AiImage(SQLModel, table=True):
 
 
 class GameState(SQLModel, table=True):
-    session_id: str = Field(primary_key=True, nullable=False)
+    session_id: Optional[str] = Field(primary_key=True, nullable=False)
     version: str = Field(nullable=False)
     world_state: str = Field(nullable=False)
     agent_states: str = Field(nullable=False)
     rng: str = Field(nullable=False)
+
+
+class GameCommand(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    session_id: str = Field(index=True, nullable=False)
+    command_id: int = Field(nullable=False)
+    command: str = Field(nullable=False)
+
+
+class GameFeedback(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    session_id: Optional[str] = Field(index=True)
+    feedback: str = Field(nullable=False)
 
 
 def create_db_and_tables():
@@ -119,7 +132,7 @@ def put_ai_image_in_cache(ai_image: AiImage):
         session.refresh(ai_image)
 
 
-def get_game_state_from_id(session_id: int) -> Optional[GameState]:
+def get_game_state_from_id(session_id: str) -> Optional[GameState]:
     with Session(engine) as session:
         statement = select(GameState).where(GameState.session_id == session_id)
         results = list(session.exec(statement))
@@ -131,5 +144,27 @@ def get_game_state_from_id(session_id: int) -> Optional[GameState]:
 def upsert_game_state(game_state: GameState):
     with Session(engine) as session:
         session.add(game_state)
+
+        session.commit()
+
+
+def push_game_command(session_id: str, command: str):
+    with Session(engine) as session:
+        command_id = session.exec(
+            select([func.count(GameCommand.id)]).where(
+                GameCommand.session_id == session_id
+            )
+        ).one()
+
+        session.add(
+            GameCommand(session_id=session_id, command_id=command_id, command=command)
+        )
+
+        session.commit()
+
+
+def add_feedback(feedback: str, session_id: Optional[str]):
+    with Session(engine) as session:
+        session.add(GameFeedback(session_id=session_id, feedback=feedback))
 
         session.commit()

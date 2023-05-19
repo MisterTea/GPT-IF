@@ -178,7 +178,7 @@ class World:
 
     version: int = 2
 
-    random: random.Random = field(default_factory=random.Random)
+    random: random.Random = field(default_factory=lambda: random.Random(1))
 
     def __post_init__(self):
         global world

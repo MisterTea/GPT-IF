@@ -45,8 +45,8 @@ DEBUG_INPUT = [
     "U",
     "uP",
     "d",
-    "weSt", # Going to your room
-    "\"ocean\"", # Telling the safe the password
+    "weSt",  # Going to your room
+    '"ocean"',  # Telling the safe the password
     "e",
     "u",
     "u",
@@ -100,13 +100,14 @@ DEBUG_INPUT = [
     "d",
     "d",
     "d",
-    "d", # In engine room, get cutscene
+    "d",  # In engine room, get cutscene
     "u",
     "u",
     "u",
     "u",
     "e",
-    "\"dogfart\"",
+    '"dogfart"',
+    '"dogwhistle"',
 ]
 
 session_id_contextvar = contextvars.ContextVar("session_id", default="")

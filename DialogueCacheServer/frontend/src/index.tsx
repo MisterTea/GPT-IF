@@ -4,6 +4,7 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import BugReportIcon from '@mui/icons-material/BugReport';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import { AppBar, Box, CssBaseline, Link as MaterialLink, MenuItem, ThemeProvider, Toolbar, Typography, createTheme } from '@mui/material';
@@ -20,6 +21,7 @@ import {
 } from "react-router-dom";
 import About from './About';
 import App from './App';
+import Feedback from './Feedback';
 import DataStore from './datastore';
 import { APP_VERSION } from './globals';
 import './index.css';
@@ -43,6 +45,7 @@ const Root = observer(({ datastore }: { datastore: DataStore }) => {
   const navigate = useNavigate();
 
   return (<div>
+    <Feedback datastore={datastore} />
     <div className="Header">
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static">
@@ -62,6 +65,7 @@ const Root = observer(({ datastore }: { datastore: DataStore }) => {
       Version {APP_VERSION}.  Made by Jason Gauci
       <MaterialLink href="https://twitter.com/neuralnets4life" target="_blank" rel="noopener"><TwitterIcon /></MaterialLink>
       <MaterialLink href="https://www.linkedin.com/in/jasongauci" target="_blank" rel="noopener"><LinkedInIcon /></MaterialLink>
+      <MaterialLink href="#" onClick={() => { datastore.openFeedback(); }}><BugReportIcon /></MaterialLink>
     </div>
   </div>);
 });

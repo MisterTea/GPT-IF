@@ -17,6 +17,7 @@ export default class DataStore {
   blocks: ChatBlock[] = [];
   currentBlockIndex: number = -1;
   gameImageUrl: string | null = null;
+  feedbackModal: boolean = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -125,5 +126,34 @@ export default class DataStore {
   goToPage(value:number) {
     console.log("GOING TO PAGE: " + (value));
     this.currentBlockIndex = value;
+  }
+
+  openFeedback() {
+    console.log("FEEDBACK IS OPEN");
+    this.feedbackModal = true;
+  }
+
+  closeFeedback() {
+    this.feedbackModal = false;
+  }
+
+  handleFeedback(feedback: string) {
+    if (feedback.length === 0) {
+      this.feedbackModal = false;
+      return;
+    }
+
+    return fetchPlus(API_SERVER_BASE + "api/feedback", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ "feedback": feedback }),
+      credentials: 'include',
+    }, 3).then(() => {
+      this.closeFeedback();
+    }).catch((reason: any) => {
+      this.closeFeedback();
+    });
   }
 }
