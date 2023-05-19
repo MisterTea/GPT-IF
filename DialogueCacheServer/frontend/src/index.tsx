@@ -21,12 +21,14 @@ import {
 import About from './About';
 import App from './App';
 import DataStore from './datastore';
+import { APP_VERSION } from './globals';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 
 Bugsnag.start({
   apiKey: 'e2092073c1186a2ea272e9a8ee40a2e4',
-  plugins: [new BugsnagPluginReact()]
+  plugins: [new BugsnagPluginReact()],
+  appVersion: APP_VERSION
 })
 
 const ErrorBoundary = Bugsnag.getPlugin('react')!.createErrorBoundary(React);
@@ -57,7 +59,7 @@ const Root = observer(({ datastore }: { datastore: DataStore }) => {
     </div>
     <Outlet />
     <div className="Footer">
-      Made by Jason Gauci
+      Version {APP_VERSION}.  Made by Jason Gauci
       <MaterialLink href="https://twitter.com/neuralnets4life" target="_blank" rel="noopener"><TwitterIcon /></MaterialLink>
       <MaterialLink href="https://www.linkedin.com/in/jasongauci" target="_blank" rel="noopener"><LinkedInIcon /></MaterialLink>
     </div>

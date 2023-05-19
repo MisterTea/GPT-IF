@@ -29,6 +29,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
   function getFocusSoon() {
     setTimeout(() => {
       commandValueRef.current.focus();
+      window.scrollTo(0, 0);
     }, 50);
   }
 

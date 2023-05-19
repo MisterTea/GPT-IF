@@ -263,14 +263,24 @@ async def handle_input(
 
     world = World()
     game_state = get_game_state_from_id(session_id)
-    assert game_state is not None, "Missing game state"
-    if not world.load(game_state):
-        gptif.console.console.print("(Incompatible save detected, starting a new game...)")
+    logger.info(f"SESSION ID {session_id}")
+    if game_state is None:
+        # Game was deleted
+        gptif.console.console.print("(Server gamefile missing, starting a new game...)")
+        world.start_chapter_one()
+        game_state = GameState(session_id=session_id)  # type: ignore
+    elif not world.load(game_state):
+        gptif.console.console.print(
+            "(Incompatible save detected, starting a new game...)"
+        )
         world.start_chapter_one()
     else:
         gptif.handle_input.handle_input(world, command.command)
+    logger.info(f"SESSION ID {session_id}")
     world.save(game_state)
+    logger.info(f"SESSION ID {session_id}")
     upsert_game_state(game_state)
+    logger.info(f"SESSION ID {session_id}")
     response = JSONResponse(content=gptif.console.console.buffers.get(session_id, []))
     logger.info("BEFORE AND AFTER")
     logger.info(gptif.console.console.buffers.get(session_id, []))

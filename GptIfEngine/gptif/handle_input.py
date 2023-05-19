@@ -56,7 +56,7 @@ def handle_input(world: World, command: str) -> bool:
 
     if len(command) == 0:
         return True
-    
+
     if world.game_over:
         console.warning("The game is over.  Please restart to play again!")
         return False
@@ -127,7 +127,7 @@ def handle_input(world: World, command: str) -> bool:
         min_wait_duration = world.min_wait_duration()
         if min_wait_duration > 0:
             console.print("Time passes...\n", style="yellow")
-            for x in range(0,min_wait_duration):
+            for x in range(0, min_wait_duration):
                 world.step()
         else:
             console.warning("There's no reason to wait")
@@ -161,21 +161,27 @@ def handle_input(world: World, command: str) -> bool:
         else:
             # Talking to safes are special
             if target_agent.uid == "vip_room_safe":
-                if statement.strip("\"").lower() == "ocean":
+                if statement.strip('"').lower() == "ocean":
                     if "VIP Pass" not in world.inventory:
-                        console.print("The safe whirrs as the metal bolt receeds.  The door swings open and you grab the vip pass.  You close the safe and the bolt locks the safe shut.")
+                        console.print(
+                            "The safe whirrs as the metal bolt receeds.  The door swings open and you grab the vip pass.  You close the safe and the bolt locks the safe shut."
+                        )
                         world.inventory.append("VIP Pass")
                     else:
                         console.print("The safe opens but it is empty")
                 else:
-                    console.print("The safe glows red.  Clearly this isn't the right password.")
+                    console.print(
+                        "The safe glows red.  Clearly this isn't the right password."
+                    )
             elif target_agent.uid == "owner_room_safe":
-                if statement.strip("\"").lower() == "dogwhistle":
+                if statement.strip('"').lower() == "dogwhistle":
                     console.print("(TODO): You win!")
                     world.game_over = True
                     return False
                 else:
-                    console.print("The safe glows red.  Clearly this isn't the right password.")
+                    console.print(
+                        "The safe glows red.  Clearly this isn't the right password."
+                    )
             else:
                 answer = converse(target_agent, statement)
                 if answer is not None:
@@ -216,7 +222,7 @@ def handle_input(world: World, command: str) -> bool:
                                 ):
                                     console.print(
                                         Markdown(
-                                            """```Good job!  You found out what Derrick likes to talk about and you mentioned it in your conversation.  This earned you a friend point with Derrick.  Friend points persist across playthroughs: once you make a friend, you have a friend for life.  Keep earning friend points to make Derrick a friend```"""
+                                            """```Good job!  You found out what Derrick likes to talk about and you mentioned it in your conversation.  This earned you a friend point with Derrick.  Keep earning friend points to make Derrick a permanent friend```"""
                                         )
                                     )
 

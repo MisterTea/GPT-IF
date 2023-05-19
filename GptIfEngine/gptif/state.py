@@ -124,7 +124,7 @@ class Agent:
     def name(self) -> str:
         return self.profile.name
 
-    def answers_to_name(self, name:str) -> bool:
+    def answers_to_name(self, name: str) -> bool:
         return name.lower() in [x.lower() for x in self.names]
 
 
@@ -354,7 +354,7 @@ class World:
         return self.rooms[self.current_room_id]
 
     def min_wait_duration(self) -> int:
-        wait_duration:Optional[int] = None
+        wait_duration: Optional[int] = None
 
         for description in self.current_room.descriptions.keys():
             if description.startswith("Tic"):
@@ -366,7 +366,7 @@ class World:
 
         if wait_duration is None:
             return 1
-        return wait_duration        
+        return wait_duration
 
     def step(self):
         self.time_in_room += 1
@@ -427,7 +427,7 @@ After a few moments, the short conversation is over and June turns back to face 
         else:
             self.visited_rooms.add(room_id)
             self.look()
-        
+
     def parse(self, text):
         result = jinja2.Environment().from_string(text).render(world=self)
         # Extract tokens
@@ -440,7 +440,6 @@ After a few moments, the short conversation is over and June turns back to face 
         result_without_tokens = re.sub(r"%%(.*?)%%", replace_tokens, result, 0)
 
         return result_without_tokens, tokens
-
 
     def go(self, direction):
         direction = direction.lower()
@@ -501,7 +500,10 @@ After a few moments, the short conversation is over and June turns back to face 
     @property
     def current_quest(self) -> Optional[str]:
         if self.on_chapter == 1:
-            return "Waiting to arrive at the cruise terminal."
+            if self.current_room_id == "driving_to_terminal":
+                return "Waiting to arrive at the cruise terminal."
+            else:
+                return "Boarding the cruise ship."
         if self.on_chapter == 2:
             if "my_stateroom" not in world.visited_rooms:
                 return "Exploring the Fortuna"
@@ -549,13 +551,15 @@ After a few moments, the short conversation is over and June turns back to face 
         return True
 
     def print_exits(self):
-        def pass_visible_test(direction_exit_pair:Tuple[str, Exit]):
+        def pass_visible_test(direction_exit_pair: Tuple[str, Exit]):
             exit = direction_exit_pair[1]
             return self.exit_visible(exit)
 
         exit_text = [
             f"* {direction}: **{self.rooms[exit.room_uid].title}**"
-            for direction, exit in filter(pass_visible_test, self.current_room.exits.items())
+            for direction, exit in filter(
+                pass_visible_test, self.current_room.exits.items()
+            )
         ]
         if len(exit_text) == 0:
             return
@@ -673,10 +677,12 @@ Derrick quickly scans your paperwork and hands you your room key.
             self.play_sections(sections)
 
     def start_ch2(self):
-        self.active_agents = set([
-            "vip_room_safe",
-            "owner_room_safe",
-        ])
+        self.active_agents = set(
+            [
+                "vip_room_safe",
+                "owner_room_safe",
+            ]
+        )
         self.on_chapter = 2
         self.time_in_chapter = 0
 
