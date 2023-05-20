@@ -27,13 +27,17 @@ import { APP_VERSION } from './globals';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 
-Bugsnag.start({
-  apiKey: 'e2092073c1186a2ea272e9a8ee40a2e4',
-  plugins: [new BugsnagPluginReact()],
-  appVersion: APP_VERSION
-})
+var ErrorBoundary: any = React.Fragment;
+if (process.env.NODE_ENV !== 'development') {
+  Bugsnag.start({
+    apiKey: 'e2092073c1186a2ea272e9a8ee40a2e4',
+    plugins: [new BugsnagPluginReact()],
+    appVersion: APP_VERSION
+  })
 
-const ErrorBoundary = Bugsnag.getPlugin('react')!.createErrorBoundary(React);
+  ErrorBoundary = Bugsnag.getPlugin('react')!.createErrorBoundary(React);
+}
+
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -53,9 +57,9 @@ const Root = observer(({ datastore }: { datastore: DataStore }) => {
             <MenuItem key="/" onClick={() => { navigate("/"); }}>
               <Typography textAlign="center">Play</Typography>
             </MenuItem>
-            <MenuItem key="about" onClick={() => { navigate("about"); }}>
+            {/*<MenuItem key="about" onClick={() => { navigate("about"); }}>
               <Typography textAlign="center">Learn</Typography>
-            </MenuItem>
+  </MenuItem>*/}
           </Toolbar>
         </AppBar>
       </Box>

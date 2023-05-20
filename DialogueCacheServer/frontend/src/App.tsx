@@ -1,5 +1,5 @@
 import { ArrowForwardIos } from '@mui/icons-material';
-import { Alert, AlertColor, AlertTitle, Grid, Pagination } from '@mui/material';
+import { Alert, AlertColor, AlertTitle, Container, Divider, Grid, Link, Pagination, Paper, Stack, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -8,8 +8,10 @@ import { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 //import rehypeRaw from 'rehype-raw';
 //import remarkDirective from 'remark-directive';
 //import remarkGfm from 'remark-gfm';
+import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
 import * as React from 'react';
 import FadeIn from 'react-fade-in';
+import { getCookie } from 'typescript-cookie';
 import './App.css';
 import ReactAnimatedEllipsis from './ReactAnimatedEllipses';
 import DataStore from './datastore';
@@ -114,14 +116,14 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
     game_text = (
       <div>
         {pagination}
-        <FadeIn key={"ChatBlock/" + datastore.currentBlockIndex}>
+        <FadeIn key={"ChatBlock/" + datastore.currentBlockIndex} transitionDuration={1000}>
           {
             datastore.currentBlock.chatSections.map((chatBlock: string, index: number, array: string[]) => {
               return <div key={"ChatBlock/" + datastore.currentBlockIndex + "/" + index} dangerouslySetInnerHTML={{ __html: chatBlock }}></div>
             })
           }
         </FadeIn>
-      </div>
+      </div >
     );
   }
   // const game_text = (<ul>
@@ -170,12 +172,18 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       </div>
     );
   }
-  if (waitingForAnswer || datastore.blocks.length === 0) {
+
+  const loadingFirstLook = (datastore.blocks.length === 0 && getCookie('session_cookie'))
+  const hasNoGame = getCookie('session_cookie') === undefined;
+  if (waitingForAnswer || loadingFirstLook) {
     ellipses = (
-      <ReactAnimatedEllipsis
-        fontSize="3rem"
-        marginLeft="5px"
-        spacing="0.3rem" />
+      <React.Fragment>
+        <span>Please wait</span>
+        <ReactAnimatedEllipsis
+          fontSize="3rem"
+          marginLeft="5px"
+          spacing="0.3rem" />
+      </React.Fragment>
     );
   }
 
@@ -207,10 +215,50 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
     gameImageHtml = <img src={datastore.gameImageUrl} alt="Logo" style={logoStyle} />;
   }
 
-  return (
-    <div className="App">
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={6} style={{ whiteSpace: "normal" }}>
+  var gameContent;
+
+  if (hasNoGame) {
+    gameContent = (
+      <React.Fragment>
+        <Stack spacing={2} textAlign='center' alignItems="center"
+          justifyContent="center">
+          <Container maxWidth="md">
+            <Paper elevation={3} style={{ padding: "10px", margin: "10px" }}>
+              <Typography style={{ padding: "10px" }}>
+                Text adventure games such as Zork, Colossal Caves, and Photopia, have captured the imagation of millions around the World.  I was one of those millions.
+              </Typography>
+              <Divider variant="middle" />
+              <Typography style={{ padding: "10px" }}>
+                My parents bought a commodore 64 second-hand from the <b>For Sale</b> section of the city newspaper.  The elderly gentleman was surprised when a 7 year old boy showed up at the doorstep.  He walked me through setting up the computer and loading disks, then handed me a box full of software.  One stood out: <Link href="https://www.myabandonware.com/game/essex-5t/play-5t" target="_blank" rel="noopener">The Essex</Link>.  It came with a hardcover fiction book instead of a manual.  After reading the book, players had to start the game to <s>find out</s> create what happened next.  This mixture of media was magical for me and I credit that moment to my interest in computers.
+              </Typography>
+              <Divider variant="middle" />
+              <Typography style={{ padding: "10px" }}>
+                I believe we are at the dawn of a new age in AI.  Large forward models, such as Large Langauge Models, are going to revolutionize how tomorrow's generation works and plays.  The text adventure you are about to play blends the latest AI with a human touch to tell a story about tragedy and friendship.  The Essex was a flawed game, but it captured my heart.  I hope The Fortuna will capture yours.
+              </Typography>
+            </Paper>
+          </Container>
+          <Container maxWidth="sm">
+            {!waitingForAnswer &&
+              <React.Fragment><Paper elevation={6} style={{ padding: "10px", margin: "10px" }}>
+                <Typography style={{ padding: "10px" }} textAlign="center">
+                  Welcome to the Fortuna.  Press the button to begin.
+                </Typography>
+              </Paper>
+                <Box textAlign='center'>
+                  <Button variant="contained" onClick={submitNewGame} size="large" endIcon={<VideogameAssetIcon />}>Start Game</Button>
+                </Box>
+              </React.Fragment>
+            }
+            {waitingForAnswer && <React.Fragment>
+              {ellipses}</React.Fragment>}
+          </Container>
+        </Stack>
+      </React.Fragment>
+    );
+  } else {
+    gameContent = (
+      <React.Fragment>
+        <Grid item xs={12} md={6} style={{ whiteSpace: "normal" }} >
           {game_text}
           {ellipses}
           {alertHtml}
@@ -221,9 +269,18 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
         </Grid>
         <Grid item xs={12}>
           <div>
-            {datastore.blocks.length > 0 && <Button variant="contained" onClick={submitNewGame}>{datastore.blocks.length === 0 ? "Start Game" : "Restart Game"}</Button>}
+            {!hasNoGame && datastore.blocks.length > 0 && <Button variant="contained" onClick={submitNewGame}>{datastore.blocks.length === 0 ? "Start Game" : "Restart Game"}</Button>}
           </div>
         </Grid>
+      </React.Fragment>
+    );
+  }
+
+  return (
+    <div className="App">
+      <Grid container spacing={2} alignItems="center"
+        justifyContent="center">
+        {gameContent}
       </Grid>
     </div>
   );

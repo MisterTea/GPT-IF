@@ -30,7 +30,8 @@ export default class DataStore {
         this.submitCommand("LOOK");
       }
     } else {
-      this.submitNewGame()
+      // Start a new game right when the browser window opens
+      //this.submitNewGame();
     }
   }
 

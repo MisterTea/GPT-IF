@@ -8,8 +8,10 @@ load_dotenv()  # take environment variables from .env.
 
 import bugsnag
 
+stage = os.environ.get("STAGE", None)
+
 bugsnag.configure(
-    api_key=os.environ["BUGSNAG_API_KEY"],
+    api_key=os.environ["BUGSNAG_API_KEY"] if stage else None,
     project_root=os.getcwd(),
 )
 
@@ -55,7 +57,6 @@ from gptif.db import (
 from gptif.llm import LlamaCppLanguageModel, OpenAiLanguageModel
 from gptif.state import World
 
-stage = os.environ.get("STAGE", None)
 root_path = f"/{stage}/" if stage else "/"
 
 app = FastAPI(title="MyAwesomeApp", root_path=root_path)

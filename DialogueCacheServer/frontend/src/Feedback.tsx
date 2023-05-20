@@ -22,7 +22,7 @@ const FormDialog = observer(({ datastore }: { datastore: DataStore }) => {
 
     return (
         <div>
-            <Dialog open={datastore.feedbackModal} onClose={handleCancel}>
+            <Dialog open={datastore.feedbackModal} onClose={handleCancel} maxWidth="md" fullWidth={true}>
                 <DialogTitle>Give Feedback</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
@@ -36,6 +36,7 @@ const FormDialog = observer(({ datastore }: { datastore: DataStore }) => {
                         fullWidth
                         multiline
                         variant="standard"
+                        minRows={3}
                         inputRef={feedbackValueRef}
                     />
                 </DialogContent>
