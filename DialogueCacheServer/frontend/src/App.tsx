@@ -35,8 +35,9 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       console.log("CLEARING");
       commandValueRef.current.value = "";
       setWaitingForAnswer(false);
-      if (datastore.blocks.length === 3 && !datastore.feedbackModal) {
-        datastore.openFeedback();
+      if (datastore.blocks.length === 3) {
+        datastore.openChatFeedbackOnce();
+        //datastore.openFeedback();
       }
       getFocusSoon();
     }).catch((reason: any) => {

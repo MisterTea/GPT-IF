@@ -25,6 +25,7 @@ export default class DataStore {
   blocks: ChatBlock[] = [];
   maxBlockIndex: number = -1;
   feedbackModal: boolean = false;
+  openedChatFeedback: boolean = false;
   _currentBlockIndex: number = -1;
 
   get currentBlockIndex(): number {
@@ -168,6 +169,15 @@ export default class DataStore {
   openFeedback() {
     console.log("FEEDBACK IS OPEN");
     this.feedbackModal = true;
+  }
+
+  openChatFeedbackOnce() {
+    if (this.openedChatFeedback) {
+      return;
+    }
+    this.openedChatFeedback = true;
+    // @ts-ignore
+    $crisp.push(['do', 'chat:open']);
   }
 
   closeFeedback() {
