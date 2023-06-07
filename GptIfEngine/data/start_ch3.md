@@ -18,10 +18,10 @@ A chipper woman jumps up and grabs your hand in a firm, but remarkably soft, han
 
 **June:** I know. It's like anything is possible.
 
-{{ world.ask_to_press_key() }}
+{{< pagebreak >}}
 
 June is tall and slender, with long brown hair and blue eyes. She is well-dressed and has a confident air about her. She glances over your shoulder and, with a pat on the arm, walks past you to greet another VIP.
 
 **June:** Enjoy the lounge and mingle with some of the guests! The exclusive full-ship tour will commence after some words from the ship's owner.
 
-{{ world.ask_to_press_key() }}
+{{< pagebreak >}}

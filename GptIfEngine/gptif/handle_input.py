@@ -7,8 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()  # take environment variables from .env.
 
 import random
-
-import click
+import string
 from rich.markdown import Markdown
 
 from gptif.console import console
@@ -113,7 +112,6 @@ def handle_input(world: World, command: str) -> bool:
     elif "L" == verb or "30" in verb_classes:  # Look
         if len(command_minus_verb) == 0:
             world.look()
-            world.step()
         else:
             try:
                 direct_object = get_direct_object(command)
@@ -139,7 +137,11 @@ def handle_input(world: World, command: str) -> bool:
                 f'When speaking, you must wrap your text in double-quotes.  For example: TELL JUAN "Hello!"'
             )
             return True
-        target_name = command_minus_verb[: command_minus_verb.find('"')].strip()
+        target_name = (
+            command_minus_verb[: command_minus_verb.find('"')]
+            .strip()
+            .translate(str.maketrans("", "", string.punctuation))  # Remove punctuation
+        )
         statement = command_minus_verb[command_minus_verb.find('"') - 1 :].strip()
 
         target_agent = None
@@ -174,8 +176,8 @@ def handle_input(world: World, command: str) -> bool:
                         "The safe glows red.  Clearly this isn't the right password."
                     )
             elif target_agent.uid == "owner_room_safe":
-                if statement.strip('"').lower() == "dogwhistle":
-                    console.print("(TODO): You win!")
+                if statement.strip('"').lower() == "poverty":
+                    world.start_ch7()
                     world.game_over = True
                     return False
                 else:

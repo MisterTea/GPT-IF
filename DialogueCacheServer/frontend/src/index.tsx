@@ -17,12 +17,13 @@ import {
   RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
+  useLocation,
   useNavigate
 } from "react-router-dom";
 import About from './About';
 import App from './App';
 import Feedback from './Feedback';
-import DataStore from './datastore';
+import DataStore, { GptifAlert } from './datastore';
 import { APP_VERSION } from './globals';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
@@ -47,6 +48,32 @@ const datastore = new DataStore();
 
 const Root = observer(({ datastore }: { datastore: DataStore }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  console.log(location.pathname);
+
+  var playOrRestart = (
+    <MenuItem key="/" onClick={() => { navigate("/"); }}>
+      <Typography textAlign="center">Play</Typography>
+    </MenuItem>
+  );
+
+  if (location.pathname === "/" || location.pathname === "/index.html") {
+    playOrRestart = (
+      <MenuItem key="/" onClick={() => {
+        datastore.submitNewGame().then(() => {
+          window.scrollTo(0, 0);
+        }).catch((reason: any) => {
+          console.log("FETCH FAILED");
+          console.log(reason);
+          const newAlert: GptifAlert = { message: "Could not start the game: " + reason, duration: 5, title: "Can't start game", severity: "error" };
+          datastore.addAlert(newAlert);
+        });
+      }}>
+        <Typography textAlign="center">Restart</Typography>
+      </MenuItem>
+    );
+  }
 
   return (<div>
     <Feedback datastore={datastore} />
@@ -54,9 +81,7 @@ const Root = observer(({ datastore }: { datastore: DataStore }) => {
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static">
           <Toolbar>
-            <MenuItem key="/" onClick={() => { navigate("/"); }}>
-              <Typography textAlign="center">Play</Typography>
-            </MenuItem>
+            {playOrRestart}
             {/*<MenuItem key="about" onClick={() => { navigate("about"); }}>
               <Typography textAlign="center">Learn</Typography>
   </MenuItem>*/}

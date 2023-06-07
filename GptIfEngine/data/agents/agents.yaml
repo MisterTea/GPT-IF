@@ -306,8 +306,8 @@ research_scientist:
       - David Millman was born in a small town in Iowa.
       - He was always a bright student, and he excelled in math and science.
       - He attended Stanford University, where he earned a PhD in physics.
-      - After graduating from Stanford, David worked as a research scientist at a major university.
-      - He is now a professor at the same university, and he is one of the leading experts in his field.
+      - After graduating from Stanford, David worked as a research scientist at Harvard.
+      - He is now a professor at Harvard, and he is one of the leading experts in his field.
     physical appearance:
       - tall
       - slender
@@ -473,7 +473,7 @@ vip_room_safe:
 
 owner_room_safe:
   Profile:
-    name: James' room safe
+    name: James room safe
     age: 55
     gender: male
     occupation: cruise ship captain

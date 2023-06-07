@@ -1,5 +1,5 @@
 import { ArrowForwardIos } from '@mui/icons-material';
-import { Alert, AlertColor, AlertTitle, Container, Divider, Grid, Link, Pagination, Paper, Stack, Typography } from '@mui/material';
+import { Alert, AlertTitle, Container, Divider, Grid, Link, Pagination, Paper, Stack, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -14,21 +14,13 @@ import FadeIn from 'react-fade-in';
 import { getCookie } from 'typescript-cookie';
 import './App.css';
 import ReactAnimatedEllipsis from './ReactAnimatedEllipses';
-import DataStore from './datastore';
-
-interface GptifAlert {
-  message: string;
-  title: string;
-  severity: AlertColor;
-  duration: number;
-}
+import DataStore, { GptifAlert } from './datastore';
 
 const App = observer(({ datastore }: { datastore: DataStore }) => {
   const commandValueRef: React.MutableRefObject<any> = useRef(''); //creating a refernce for TextField Component
   const commandRef: React.MutableRefObject<any> = useRef(null); //creating a refernce for TextField Component
 
   const [waitingForAnswer, setWaitingForAnswer] = useState<boolean>(false);
-  const [alerts, setAlerts] = useState<GptifAlert[]>([]);
 
   function getFocusSoon() {
     setTimeout(() => {
@@ -54,7 +46,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       console.log(commandValueRef.current);
       getFocusSoon();
       const newAlert: GptifAlert = { message: "Could not send command: " + reason, duration: 5, title: "Command failed", severity: "error" };
-      setAlerts([...alerts, newAlert]);
+      datastore.addAlert(newAlert);
     })
   }
 
@@ -81,36 +73,31 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       console.log(reason);
       setWaitingForAnswer(false);
       const newAlert: GptifAlert = { message: "Could not start the game: " + reason, duration: 5, title: "Can't start game", severity: "error" };
-      setAlerts([...alerts, newAlert]);
+      datastore.addAlert(newAlert);
     });
-  }, [datastore, alerts]);
+  }, [datastore]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (alerts.length === 0) {
+      if (datastore.alerts.length === 0) {
         return;
       }
 
-      alerts.forEach(alert => {
-        alert.duration -= 1;
-      });
-      setAlerts(alerts.filter((alert) => {
-        return alert.duration > 0;
-      }))
+      datastore.updateAlerts();
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [alerts, setAlerts, submitNewGame]);
+  }, [datastore, submitNewGame]);
 
   var game_text = null;
   if (datastore.currentBlock !== null) {
     var pagination = null;
-    if (datastore.blocks.length > 1) {
+    if (datastore.maxBlockIndex > 1 && datastore.maxBlockIndex === datastore.blocks.length - 1) {
       const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
         datastore.goToPage(value - 1);
       };
 
-      pagination = <Pagination count={datastore.blocks.length} shape="rounded" size="small" page={datastore.currentBlockIndex + 1} onChange={handlePageChange} />;
+      pagination = <Pagination variant="outlined" count={datastore.maxBlockIndex + 1} shape="rounded" size="small" page={datastore.currentBlockIndex + 1} onChange={handlePageChange} hideNextButton={datastore.currentBlockIndex === datastore.blocks.length - 1} />;
     }
 
     game_text = (
@@ -139,28 +126,38 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
   if (datastore.blocks.length > 0) {
     var showReturnButton = false;
     var showCommandBox = false;
+    var showNextPageButton = false;
     if (waitingForAnswer) {
     } else {
       if (datastore.currentBlockIndex !== datastore.blocks.length - 1) {
         showCommandBox = false;
-        showReturnButton = true;
+        if (datastore.currentBlockIndex !== datastore.maxBlockIndex) {
+          showReturnButton = true;
+        } else {
+          showNextPageButton = true;
+        }
       } else {
         showCommandBox = true;
       }
     }
     commandBox = (
       <div>
-        <Button variant="contained" style={{ visibility: (showReturnButton ? 'visible' : 'hidden') }} onClick={() => {
+        <Button variant="outlined" style={{ visibility: (showReturnButton ? 'visible' : 'hidden') }} onClick={() => {
           datastore.goToLastPage();
         }}>
           Return to current scene
+        </Button>
+        <Button variant="outlined" style={{ visibility: (showNextPageButton ? 'visible' : 'hidden') }} onClick={() => {
+          datastore.goToNextPage();
+        }}>
+          Read on...
         </Button>
         <Box sx={{ display: 'flex', p: 1 }} style={{ visibility: (showCommandBox ? 'visible' : 'hidden') }}>
           <Box sx={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1 }}>
             <ArrowForwardIos sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
             <TextField id="input-with-sx" label="Tap/Click here" variant="standard" fullWidth multiline onKeyDown={submitIfEnter} inputRef={commandValueRef} ref={commandRef} autoComplete="off" style={{ paddingRight: "10px" }} />
           </Box>
-          <Button variant="contained" onClick={() => {
+          <Button variant="outlined" onClick={() => {
             const command = commandValueRef.current.value;
             //if (command.length === 0)
             //return;
@@ -189,9 +186,9 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
 
   var alertHtml = null;
   var alertIndex = 0;
-  if (alerts.length > 0) {
+  if (datastore.alerts.length > 0) {
     alertHtml = (
-      alerts.map((alert: GptifAlert) => {
+      datastore.alerts.map((alert: GptifAlert) => {
         alertIndex += 1;
         return (
           <Alert severity={alert.severity} key={"Alert_" + alertIndex}>
@@ -245,7 +242,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
                 </Typography>
               </Paper>
                 <Box textAlign='center'>
-                  <Button variant="contained" onClick={submitNewGame} size="large" endIcon={<VideogameAssetIcon />}>Start Game</Button>
+                  <Button variant="outlined" onClick={submitNewGame} size="large" endIcon={<VideogameAssetIcon />}>Start Game</Button>
                 </Box>
               </React.Fragment>
             }
@@ -269,7 +266,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
         </Grid>
         <Grid item xs={12}>
           <div>
-            {!hasNoGame && datastore.blocks.length > 0 && <Button variant="contained" onClick={submitNewGame}>{datastore.blocks.length === 0 ? "Start Game" : "Restart Game"}</Button>}
+            {false && !hasNoGame && datastore.blocks.length > 0 && <Button variant="outlined" onClick={submitNewGame}>{datastore.blocks.length === 0 ? "Start Game" : "Restart Game"}</Button>}
           </div>
         </Grid>
       </React.Fragment>

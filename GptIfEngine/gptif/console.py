@@ -10,12 +10,9 @@ import gptif.settings
 DEBUG_INPUT = [
     'ASK Juan "Where are you from?"',  #
     "LOOK AT THE TERMINAL",  #
-    '"What are you doing right now?"',  #
-    # 3 turns driving
-    "LOOK AT THE WINDOW",  #
     "GOAL",  # GOAL does not cost a turn
-    "WAIT",  # WAIT should wait for two turns
-    # 6 turns driving, at the terminal now
+    '"What are you doing right now?"',  #
+    # At the terminal now
     "watch the television",
     "watch tv",
     "look at the television on the column",
@@ -64,25 +61,25 @@ DEBUG_INPUT = [
     'tell David "What is your research area?"',
     'tell David "Tell me about particle physics"',
     # 3 steps, move
-    "Look",
-    "Look",
-    "Look",
+    "Look at nancy",
+    "Look at nancy",
+    "Look at nancy",
     # 3 steps, move
-    "Look",
-    "Look",
-    "Look",
+    "Look at nancy",
+    "Look at nancy",
+    "Look at nancy",
     # 3 steps, move
-    "Look",
-    "Look",
-    "Look",
+    "Look at nancy",
+    "Look at nancy",
+    "Look at nancy",
     # 3 steps, move
-    "Look",
-    "Look",
-    "Look",
+    "Look at nancy",
+    "Look at nancy",
+    "Look at nancy",
     # 3 steps, move
-    "Look",
-    "Look",
-    "Look",
+    "Look at nancy",
+    "Look at nancy",
+    "Look at nancy",
     # 2 steps until event
     "wait",
     "wait",
@@ -103,11 +100,19 @@ DEBUG_INPUT = [
     "d",  # In engine room, get cutscene
     "u",
     "u",
+    "n",
+    '"What is a black hole?"',
+    '"What is your favorite physics lesson?"',
+    "persuade david",
+    "s",
     "u",
     "u",
     "e",
     '"dogfart"',
-    '"dogwhistle"',
+    "w",
+    "u",
+    "persuade nancy",
+    #'"poverty"',
 ]
 
 session_id_contextvar = contextvars.ContextVar("session_id", default="")

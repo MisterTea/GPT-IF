@@ -102,7 +102,7 @@ An attractive terminal hostess is gesturing as a narrator explains how to embark
 
 > "Cruise ships offer a variety of activities for all ages. Whether you are looking for a relaxing vacation or an action-packed adventure, you will find it on a cruise ship! Thanks for watching, and have a great cruise!"
 
-{{ world.ask_to_press_key() }}
+{{< pagebreak >}}
 
 ```
 Hiya!  It's your friendly programmer again.  In text adventures, you can move by typing the direction that you wish to travel.  For example, the cruise check-in desk is to the north, so you can go there by simply typing NORTH.  GO NORTH, WALK NORTH, RUN NORTH, etc. also works.
@@ -142,6 +142,10 @@ The fountain is surrounded by a walkway, and you can walk around it to get a clo
 
 You stand for a moment, enjoying the peace and tranquility of the fountain. It is a welcome respite from the hustle and bustle of the ship. You take a deep breath of the fresh air, and you feel your stress start to melt away.
 
+Then something at the bottom of the fountain basin catches your eye: the tiles are arranged in a mosiac forming the letter **p**.  You make a mental note of this.
+
+%%{{ world.password_letters_found.add("p") }}%%
+
 # gym_locker
 
 ## look
@@ -151,3 +155,41 @@ The gym locker is a small, secure storage space that is typically found in a gym
 ## open
 
 {% if "keycard" not in world.inventory%}You open the locker and find an officer uniform and keycard.  You quickly pocket the keycard.%%{{ world.inventory.append("keycard") }}%%{% else %}You open the locker another time just to make sure you didn't miss anything{% endif %}
+
+# theater_painting
+
+## look
+
+The painting in The Fortuna Theater is a beautiful masterpiece, displayed prominently on one of the walls. It seems to depict a dramatic scene, with vivid colors and intricate details. The brushstrokes are bold and confident, conveying a sense of power and passion. As you gaze at the painting, you feel as though you are being drawn into its world, lost in its beauty and complexity. It is a true work of art, and it adds to the grandeur and sophistication of the theater.
+
+There's something about the patterns of this painting that strike you, making you tremble.  It's a whirl of planets that forms strokes based on their trajectories.  You feel like, with the help of another, you could crack some hidden code in this artistic steganography.
+
+{% if world.on_chapter >= 6 %}
+{% if world.friends_with("research_scientist") %}
+{% if 'y' not in world.password_letters_found %}
+You and David stare at the painting together and start making mental notes of the movement of the planets from the directions of their blur.
+
+**David:** Are you seeing what I'm seeing, boy?  Look at how they all make a 'v' but then bounce at the bottom.  Every single one of the constellations...
+
+**Alfred:** If my calculations are correct, the ones travelling from top-right to bottom-left keep going and then make the bounce.
+
+**David:** It's all forming...
+
+**Alfred:** A letter.
+
+**Both:** y!  It's a lowercase "y"!
+
+**David:** Haha, even on a stuffy ship like this, we can find an artist with a good grasp of physics and a sense of humor!
+
+**Alfred:** I feel like there is more than simply jest here, but thanks for your time, sir.
+
+**David:** The pleasure is all mine!  So rare to see a mind with both inquisition and patience these days.
+%%{{ world.password_letters_found.add('y') }}%%
+{% else %}
+You and David continue to admire the painting
+{% endif %}
+{% else %}
+You feel as though, with David's help, you could uncover the mysteries of the universe, and of this painting.
+{% endif %}
+{% endif %}
+

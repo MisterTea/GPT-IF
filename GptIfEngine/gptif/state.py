@@ -175,8 +175,9 @@ class World:
     time_in_chapter: int = 0
     inventory: List[str] = field(default_factory=list)
     game_over: bool = False
+    password_letters_found: Set[str] = field(default_factory=set)
 
-    version: int = 2
+    version: int = 3
 
     random: random.Random = field(default_factory=lambda: random.Random(1))
 
@@ -202,6 +203,11 @@ class World:
                     assert current_room != ""
                     assert current_topic != ""
                     room_descriptions[current_room][current_topic].append(section)
+
+            # Re-split room descriptions
+            for rd in room_descriptions.values():
+                for topic in rd.keys():
+                    rd[topic] = "\n\n".join(rd[topic]).split("{{< pagebreak >}}")
 
         # Load rooms
         with open("data/rooms/rooms.yaml", "r") as rooms_file:
@@ -240,6 +246,11 @@ class World:
                     assert current_scenery != ""
                     assert current_action != ""
                     scenery_actions[current_scenery][current_action].append(section)
+
+            # Re-split scenery descriptions
+            for sd in scenery_actions.values():
+                for action in sd.keys():
+                    sd[action] = "\n\n".join(sd[action]).split("{{< pagebreak >}}")
 
         # Load scenery
         with open("data/rooms/scenery.yaml", "r") as fp:
@@ -289,6 +300,7 @@ class World:
             "time_in_chapter": self.time_in_chapter,
             "inventory": self.inventory,
             "version": self.version,
+            "password_letters_found": list(sorted(self.password_letters_found)),
         }
         agent_states = {}
         for agent_id, agent in self.agents.items():
@@ -315,6 +327,7 @@ class World:
         # Convert lists back to sets
         self.active_agents = set(self.active_agents)
         self.visited_rooms = set(self.visited_rooms)
+        self.password_letters_found = set(self.password_letters_found)
 
         agent_states = json.loads(session.agent_states)
         for agent_id, agent_state in agent_states.items():
@@ -341,9 +354,7 @@ class World:
         #         self.agents[agent_uid].upgrade(newer_world.agents[agent_uid])
 
     def ask_to_press_key(self):
-        if not gptif.settings.CLI_MODE:
-            return
-        if gptif.settings.DEBUG_MODE:
+        if gptif.settings.DEBUG_MODE or not gptif.settings.CLI_MODE:
             console.print("[blue]Press enter to continue...[/]")
         else:
             console.input("[blue]Press enter to continue...[/]")
@@ -391,7 +402,7 @@ class World:
             self.play_sections(
                 """Terrus pushes past David, making the older gentleman stumble and fall to one knee.  You run over to help David up as June spins around to face the tour.
 
-**June Hope**: Pardon me, sir, but the tour is still ongoing!
+**June**: Pardon me, sir, but the tour is still ongoing!
 
 **Terrus Black**: Apologies, but I have urgent matters to attend to.
 
@@ -399,17 +410,17 @@ Terrus walks through June as if she wasn't there.  June quickly steps to the sid
 As Terrus exits down the stairs, you notice a surveillance earpiece in his right ear.
 June is visibly upset but her professional instincts kick in and she smiles politely to the remainder of the group.
 
-**June Hope**: Please bear with me for one moment.  Thank you!
+**June**: Please bear with me for one moment.  Thank you!
 
 June pulls out a two-way radio and murmurs something unintelligible.
 
-{{ world.ask_to_press_key() }}
+{{< pagebreak >}}
 
 After a few moments, the short conversation is over and June turns back to face the tour.
 
-**June Hope**: Alright, let's hurry along then!  Please enjoy this area for a moment longer, then the tour will continue shortly.
+**June**: Alright, let's hurry along then!  Please enjoy this area for a moment longer, then the tour will continue shortly.
 """.split(
-                    "\n\n"
+                    "{{< pagebreak >}}"
                 )
             )
             self.agents["mercenary"].room_id = None
@@ -461,7 +472,7 @@ After a few moments, the short conversation is over and June turns back to face 
             result_without_tokens, tokens = self.parse(exit.prescript)
 
             if len(result_without_tokens) > 0:
-                self.play_sections(result_without_tokens.split("\n\n"))
+                self.play_sections(result_without_tokens.split("{{< pagebreak >}}"))
             if "False" in tokens:
                 return False
         self.move_to(exit.room_uid)
@@ -495,6 +506,7 @@ After a few moments, the short conversation is over and June turns back to face 
     def look_quickly(self):
         self.print_header()
         self.play_sections(self.current_room.descriptions["Short"], markdown=True)
+        display_image_for_prompt(self.current_room.descriptions["Long"][0])
         self.print_footer()
 
     @property
@@ -524,7 +536,8 @@ After a few moments, the short conversation is over and June turns back to face 
             if "owner_stateroom" not in world.visited_rooms:
                 return "Going to James Carrington's VIP room"
             else:
-                return "Solving James Carrington's Safe Puzzle"
+                password_string = ",".join(list(self.password_letters_found))
+                return f"Solving James Carrington's Safe Puzzle ({password_string})"
 
         return None
 
@@ -588,12 +601,14 @@ After a few moments, the short conversation is over and June turns back to face 
         look_object_root = look_object.split(" ")[-1]
 
         # Check if we are looking at a person
-        for agent in self.agents_in_room:
-            if agent.answers_to_name(look_object_root):
-                if agent.room_id == self.current_room_id:
-                    description = describe_character(agent)
-                    self.play_sections([description])
-                    return True
+        if verb == "look":
+            for agent in self.agents_in_room:
+                if agent.answers_to_name(look_object_root):
+                    if agent.room_id == self.current_room_id:
+                        description = describe_character(agent)
+                        display_image_for_prompt(description)
+                        self.play_sections([description])
+                        return True
 
         hypernyms_set = get_hypernyms_set(look_object_root)
         # Loop through all scenery in the room, looking for a match
@@ -628,6 +643,9 @@ After a few moments, the short conversation is over and June turns back to face 
                 self.current_room.descriptions["Long"],
             )
             if fake_scenery is not None:
+                if fake_scenery.count(".") > 1:
+                    # Draw the object if the description is more than one sentence
+                    display_image_for_prompt(fake_scenery)
                 self.play_sections([fake_scenery])
                 return True
         return False
@@ -635,9 +653,11 @@ After a few moments, the short conversation is over and June turns back to face 
     def play_sections(
         self, sections: List[str], style: Optional[str] = None, markdown: bool = True
     ):
-        for section in sections:
+        for i, section in enumerate(sections):
             paragraph, tokens = self.parse(section)
             if len(paragraph) > 0 and paragraph != "None":
+                if i > 0:
+                    world.ask_to_press_key()
                 if markdown:
                     console.print(Markdown(paragraph), style=style)
                 else:
@@ -660,10 +680,42 @@ After a few moments, the short conversation is over and June turns back to face 
 Derrick quickly scans your paperwork and hands you your room key.
 
 **Derrick Williams:** Go north to board the ship, sir.""".split(
-                    "\n\n"
+                    "{{< pagebreak >}}"
                 ),
                 "yellow",
             )
+        elif agent.uid == "research_scientist":
+            if self.on_chapter >= 6:
+                self.act_on("look", "painting")
+            else:
+                console.print(
+                    "You would love to persuade David to accept you as his post-doc student, but now isn't the right time."
+                )
+        elif agent.uid == "vip_reporter":
+            if self.on_chapter >= 6:
+                if "v" in self.password_letters_found:
+                    console.print("You thank Nancy again for her help.")
+                else:
+                    self.play_sections(
+                        [
+                            """
+Nancy beams a large smile to you.  She has a smile that can make boulders give up their secrets.
+
+**Nancy:** Hey, buddy!  Feeling better after what happened?  I got something I wanted to run by you:  I think there's hidden letters around the ship.
+
+**Alfred:** Really?  What have you seen?
+
+**Nancy:** Well it's mostly a rumor, but I have been talking to the crew and they all have the letter 'v' etched into the crew bunks.  People have heard rumors of other letters around.  Let me know if you find anything!
+
+**Alfred:** Will do, thanks Nancy!
+"""
+                        ]
+                    )
+                    self.password_letters_found.add("v")
+            else:
+                console.print(
+                    "You feel that Nancy's detective work makes her a great friend to have, and you don't want to waste your favors until you really need something."
+                )
 
     def start_chapter_one(self):
         self.active_agents = set(["taxi_driver", "port_security_officer"])
@@ -673,7 +725,7 @@ Derrick quickly scans your paperwork and hands you your room key.
         self.time_in_chapter = 0
 
         with open("data/start_ch1.md", "r") as fp:
-            sections = fp.read().split("\n\n")
+            sections = fp.read().split("{{< pagebreak >}}")
             self.play_sections(sections)
 
     def start_ch2(self):
@@ -687,7 +739,7 @@ Derrick quickly scans your paperwork and hands you your room key.
         self.time_in_chapter = 0
 
         with open("data/start_ch2.md", "r") as fp:
-            sections = fp.read().split("\n\n")
+            sections = fp.read().split("{{< pagebreak >}}")
             self.play_sections(sections)
 
     def start_ch3(self):
@@ -706,7 +758,7 @@ Derrick quickly scans your paperwork and hands you your room key.
         self.time_in_chapter = 0
 
         with open("data/start_ch3.md", "r") as fp:
-            sections = fp.read().split("\n\n")
+            sections = fp.read().split("{{< pagebreak >}}")
             self.play_sections(sections)
 
     def start_ch4(self):
@@ -718,7 +770,7 @@ Derrick quickly scans your paperwork and hands you your room key.
         self.time_in_chapter = 0
 
         with open("data/start_ch5.md", "r") as fp:
-            sections = fp.read().split("\n\n")
+            sections = fp.read().split("{{< pagebreak >}}")
             self.play_sections(sections)
 
         # Move some agents around
@@ -732,11 +784,19 @@ Derrick quickly scans your paperwork and hands you your room key.
         self.time_in_chapter = 0
 
         with open("data/start_ch6.md", "r") as fp:
-            sections = fp.read().split("\n\n")
+            sections = fp.read().split("{{< pagebreak >}}")
+            self.play_sections(sections)
+
+    def start_ch7(self):
+        self.on_chapter = 7
+        self.time_in_chapter = 0
+
+        with open("data/start_ch7.md", "r") as fp:
+            sections = fp.read().split("{{< pagebreak >}}")
             self.play_sections(sections)
 
     def check_can_board_ship(self):
-        if self.agents["port_security_officer"].friend_points >= 2:
+        if self.friends_with("port_security_officer"):
             console.print(
                 Markdown(
                     """The security officer waves you along with a smile.
@@ -753,11 +813,14 @@ Congratulations!  You solved your first puzzle.  More adventure awaits!
         console.print(
             Markdown(
                 """```
-This is your first empathy puzzle!  Ask the officer questions and learn what they want to talk about, then ask questions about what they like to talk about until they become your friend.
+This is your first empathy puzzle!  Ask the officer questions and learn what they want to talk about, then talk about what they like to talk about until they become your friend.
 ```"""
             )
         )
         return False
+
+    def friends_with(self, agent_name: str):
+        return self.agents[agent_name].friend_points >= 2
 
 
 class ScriptId(IntEnum):
@@ -808,7 +871,7 @@ class TourGuideMovementScript(MovementScript):
                     ]
                 random.shuffle(tour_group)
                 # Move everyone to the pool deck
-                console.print(Markdown("**June Hope:** Come along, everyone."))
+                console.print(Markdown("**June:** Come along, everyone."))
                 world.send_agent(agent, direction)
                 [
                     world.send_agent(agent, direction)

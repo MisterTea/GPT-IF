@@ -119,3 +119,12 @@ gym_locker:
     - cabinet.n.03
   rooms:
     - gym_locker_room
+
+theater_painting:
+  hints:
+    - painting
+  names:
+    - fine_arts.n.01
+    - art.n.01
+  rooms:
+    - theater

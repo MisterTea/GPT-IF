@@ -69,3 +69,13 @@
     transform: rotate(360deg);
   }
 }
+
+pre {
+  line-height: normal;
+  background: #001600;
+}
+
+blockquote {
+  line-height: normal;
+  background: #160016;
+}

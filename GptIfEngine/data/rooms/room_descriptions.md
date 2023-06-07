@@ -4,23 +4,23 @@
 
 It's a beautiful day in Tampa, and you're excited to be taking a taxi to the cruise terminal. As you ride, you look out the window and see the cityscape passing by. You pass by tall buildings, busy streets, and parks. You can see the Hillsborough River in the distance.
 
-## Tic 2
+## Tic 1
 
 ```
 If you haven't yet, try LOOKing at something.  For example, you can LOOK AT THE TERMINAL.  Things that are of particular interest are highlighted in **bold**, but you can look at anything!
 ```
 
-## Tic 3
+## Tic 2
 
 After a while, you reach the outskirts of the city and you start to see more open space. You pass by farms, fields, and forests. You can smell the fresh air, and you can hear the birds singing. You feel relaxed and happy, and you know that you're going to have a great time on your cruise.
 
-## Tic 6
+## Tic 3
 
 The taxi pulls up to the curb, and you get out. You take a moment to look around, and you are impressed by the size and grandeur of the terminal. You know that you are about to embark on an amazing journey, and you can't wait to get started.
 
-{{ world.ask_to_press_key() }}
+{{< pagebreak >}}
 
-{{ world.move_to("cruise_terminal") }}
+%%{{ world.move_to("cruise_terminal") }}%%
 
 <!---
 Finally, you arrive at the cruise terminal. You get out of the taxi and pay the driver.
@@ -39,6 +39,10 @@ The departure lounge is a large, comfortable space with plenty of seating. There
 A television screen fixed to a column is playing an information video on loop. This may be a good time to **watch the television**.
 
 The check-in desk stands between you and the gangway to the **north**.
+
+```
+To walk in a direction, simply type that direction, or you can type "GO NORTH" or "WALK NORTH", "STROLL NORTH", "SAUNTER NORTH"... whatever gait fits your fancy!
+```
 
 ## Short
 
@@ -122,7 +126,7 @@ James Carrington's stateroom is a spacious, opulent suite with stunning views of
 
 ## Long
 
-You are standing in the The Fortuna Theater, a large and ornate room with a stage, a proscenium arch, and red velvet curtains. There are several rows of seats arranged in a semicircle around the stage, and there is a large screen above the stage for showing movies or presentations. The theater is decorated with chandeliers and paintings, and it has a luxurious and elegant feel.
+You are standing in the The Fortuna Theater, a large and ornate room with a stage, a proscenium arch, and red velvet curtains. There are several rows of seats arranged in a semicircle around the stage, and there is a large screen above the stage for showing movies or presentations. The theater is decorated with **chandeliers** and **paintings**, and it has a luxurious and elegant feel.
 
 ## Short
 
@@ -168,47 +172,47 @@ A tall man with dark hair and eyes uses a short staircase as a stage and clears 
 
 James Carrington is a 45-year-old financier. He is tall, handsome, and well-dressed. James was born into a wealthy family and attended Harvard University, where he earned a degree in business. After graduating from Harvard, James went to work on Wall Street. He quickly rose through the ranks, and by the time he was 30, he was a multi-millionaire. However, James's luck soon changed. He made a series of bad investments, and by the time he was 45, he was facing bankruptcy. James is now determined to rebuild his financial empire. His drive and energy is infectious: before he even begins speaking, you feel compelled to take up arms and join him on any quest.
 
-**James Carrington:** Good evening, ladies and gentlemen. Welcome aboard the Fortuna, my newest and most luxurious cruise ship. I'm James Carrington, the owner and operator of this ship, and I'm honored to have you all here.
+**James:** Good evening, ladies and gentlemen. Welcome aboard the Fortuna, my newest and most luxurious cruise ship. I'm James Carrington, the owner and operator of this ship, and I'm honored to have you all here.
 
-**James Carrington:** I know you're all wondering why I've invited you here. Some of you are here because you have a large megaphone, even if it hasn't been the kindest to me.
+**James:** I know you're all wondering why I've invited you here. Some of you are here because you have a large megaphone, even if it hasn't been the kindest to me.
 
 An unexpected laugh causes Nancy Smith to spit a partial mouthful of vodka sour into her glass. She attempts unsuccessfully to control a coughing fit.
 
-{{ world.ask_to_press_key() }}
+{{< pagebreak >}}
 
-**James Carrington:** Some of you are here because of your brilliance, your charm, your passion. Some of you are here because I owe you a lot of money.
+**James:** Some of you are here because of your brilliance, your charm, your passion. Some of you are here because I owe you a lot of money.
 
 James chuckles and raises a toast. Then, James' eyes land on you. He stares directly into your soul. You are both inspired and terrified.
 
-**James Carrington:** And for some of you, today is just your lucky day.
+**James:** And for some of you, today is just your lucky day.
 
-Point to the dragon, to the shore of Normandy. You would do anything for James Carrington right now.
+Point to the dragon, to the shore of Normandy. You would do anything for James right now.
 
-{{ world.ask_to_press_key() }}
+{{< pagebreak >}}
 
-**James Carrington:** Well, I'm here to tell you that I'm starting a new chapter in my life. I've been through a lot in the past few years, but I've come out the other side stronger than ever. And I'm ready to start over. This ship is my way of starting over. It's a symbol of my new beginning. And I want you all to be a part of it.
+**James:** Well, I'm here to tell you that I'm starting a new chapter in my life. I've been through a lot in the past few years, but I've come out the other side stronger than ever. And I'm ready to start over. This ship is my way of starting over. It's a symbol of my new beginning. And I want you all to be a part of it.
 
-**James Carrington:** I've spared no expense in making this ship the best it can be. The accommodations are luxurious, the food is delicious, and the entertainment is world-class. And I'm confident that you'll all have a wonderful time on board. But this ship is more than just a vacation destination. It's also a business venture. I'm hoping to make this ship the most successful cruise ship in the world. And I need your help to do it.
+**James:** I've spared no expense in making this ship the best it can be. The accommodations are luxurious, the food is delicious, and the entertainment is world-class. And I'm confident that you'll all have a wonderful time on board. But this ship is more than just a vacation destination. It's also a business venture. I'm hoping to make this ship the most successful cruise ship in the world. And I need your help to do it.
 
-**James Carrington:** I'm asking you to spread the word about this ship. Tell your friends, family, and colleagues about it. And when you're on board, be sure to leave a positive review online. With your help, I know we can make this ship a success. And I can't wait to see what the future holds for us. Thank you, and enjoy this beautiful ship.
+**James:** I'm asking you to spread the word about this ship. Tell your friends, family, and colleagues about it. And when you're on board, be sure to leave a positive review online. With your help, I know we can make this ship a success. And I can't wait to see what the future holds for us. Thank you, and enjoy this beautiful ship.
 
-{{ world.ask_to_press_key() }}
+{{< pagebreak >}}
 
 James pulls out his cell phone and begins speaking to someone. After a few moments, he raises his right hand in a half-cheer half-salute.
 
-**James Carrington:** Unfortunately, I have some urgent matters to attend to and must be off. I'm sorry that I couldn't accompany you on the tour, but I know that you are in great hands with June. June: please work with Sylvia to escort these guests to my Florida house after the tour is complete.
+**James:** Unfortunately, I have some urgent matters to attend to and must be off. I'm sorry that I couldn't accompany you on the tour, but I know that you are in great hands with June. June: please work with Sylvia to escort these guests to my Florida house after the tour is complete.
 
-**June Hope:** Yes, sir!
+**June:** Yes, sir!
 
 With that, James exits down the stairs in a calculated hurry.
 
-{{ world.send_agent(world.agents["financier"], "down") }}
+%%{{ world.send_agent(world.agents["financier"], "down") }}%%
 
-{{ world.move_agent(world.agents["financier"], None) }}
+%%{{ world.move_agent(world.agents["financier"], None) }}%%
 
-{{ world.ask_to_press_key() }}
+{{< pagebreak >}}
 
-**June Hope:** Alright, ladies and gentlemen! The tour will commence in a few moments. We will be visiting parts of the ship that few guests have ever seen, so I am asking everyone to stick together. Also, this is the first and last part of the tour where you can say 'hi' to our knowledgeable and compassionate captain, Captain John!
+**June:** Alright, ladies and gentlemen! The tour will commence in a few moments. We will be visiting parts of the ship that few guests have ever seen, so I am asking everyone to stick together. Also, this is the first and last part of the tour where you can say 'hi' to our knowledgeable and compassionate captain, Captain John!
 
 **Captain John:** It's great to get the opportunity to meet such a bright and talented group of folks. Have an amazing cruise!
 
@@ -216,13 +220,13 @@ With that, James exits down the stairs in a calculated hurry.
 
 Captain John gives everyone a wave and marches off to a less ceremonial, and probably more important, duty.
 
-{{ world.send_agent(world.agents["captain"], "down") }}
+%%{{ world.send_agent(world.agents["captain"], "down") }}%%
 
-{{ world.move_agent(world.agents["captain"], None) }}
+%%{{ world.move_agent(world.agents["captain"], None) }}%%
 
-**June Hope:** Ladies and gentleman, grab your food and beverages and get ready. We will depart momentarily.
+**June:** Ladies and gentleman, grab your food and beverages and get ready. We will depart momentarily.
 
-{{ world.start_ch4() }}
+%%{{ world.start_ch4() }}%%
 
 # mess_hall_hallway
 
@@ -314,11 +318,11 @@ The gym locker room is a large, clean, and well-maintained space with lockers, s
 
 The boat, capsized, sinks rapidly into the dark abyss of the gulf. You are treading water in the gulf. You are not sure what to do. You have no food or water, and you are not sure how long you will be able to survive. You start to think about all the things you will miss, and all the things you will never get to do. You start to think about death, and you are not sure if you are ready to die. You look for other passengers but it's hard to see anything over the waves.
 
-{{ world.ask_to_press_key() }}
+{{< pagebreak >}}
 
 You try to stay calm and think clearly, but it is hard. The sun is beating down on you, and the waves are crashing over you. You are exhausted, and you are starting to lose hope. You know that you cannot survive in the gulf for much longer. You need to find a way to get to land.
 
-{{ world.ask_to_press_key() }}
+{{< pagebreak >}}
 
 You look around, and you see nothing but water. You start to swim, but you are not making any progress. The waves are too strong, and they are pushing you back towards the open gulf. You start to panic, and you think that you are going to die.
 
@@ -326,7 +330,7 @@ You try to stay calm, but it is hard. You are exhausted, and you are starting to
 
 You keep swimming, but you are making no progress. You are starting to lose consciousness. You know that you are going to die. You think about all the things you will miss, and all the things you will never get to do. You think about death, and you are not sure if you are ready to die.
 
-{{ world.ask_to_press_key() }}
+{{< pagebreak >}}
 
 You close your eyes and wait for death to come.
 

@@ -1,3 +1,4 @@
+import { AlertColor } from "@mui/material";
 import { Marked } from "@ts-stack/markdown";
 import { makeAutoObservable } from "mobx";
 import { getCookie } from "typescript-cookie";
@@ -8,6 +9,13 @@ if (window.location.hostname.endsWith("amazonaws.com")) {
   API_SERVER_BASE = "https://90rjg2sbkg.execute-api.us-east-1.amazonaws.com/dev/";
 }
 
+export interface GptifAlert {
+  message: string;
+  title: string;
+  severity: AlertColor;
+  duration: number;
+}
+
 export class ChatBlock {
   imageUrl: string | null = null;
   chatSections: string[] = [];
@@ -15,9 +23,21 @@ export class ChatBlock {
 
 export default class DataStore {
   blocks: ChatBlock[] = [];
-  currentBlockIndex: number = -1;
+  maxBlockIndex: number = -1;
   gameImageUrl: string | null = null;
   feedbackModal: boolean = false;
+  _currentBlockIndex: number = -1;
+
+  get currentBlockIndex(): number {
+    return this._currentBlockIndex;
+  }
+
+  set currentBlockIndex(i: number) {
+    this._currentBlockIndex = i;
+    this.maxBlockIndex = Math.max(i, this.maxBlockIndex);
+  }
+
+  alerts:GptifAlert[] = [];
 
   constructor() {
     makeAutoObservable(this);
@@ -39,8 +59,10 @@ export default class DataStore {
     this.gameImageUrl = image_url;
   }
 
-  createChatBlockFromResponse(responseResults: any[]) {
-    const chatBlock = new ChatBlock();
+  createChatBlocksFromResponse(responseResults: any[]) {
+    const chatBlocks = []
+    var chatBlock = new ChatBlock();
+    chatBlocks.push(chatBlock);
     const chatSections = responseResults.map((responseResult: any[]) => {
       var responseText = responseResult[0];
       if (responseResult[1] !== null) {
@@ -66,10 +88,19 @@ export default class DataStore {
         this.setGameImage(image_url);
         return null;
       }
+
       return Marked.parse(responseText);
     }).filter(response => response !== null) as string[];
-    chatBlock.chatSections = chatSections;
-    return chatBlock;
+
+    chatSections.forEach(chatSection => {
+      if (chatSection.includes("Press enter to continue...")) {
+        chatBlock = new ChatBlock();
+        chatBlocks.push(chatBlock);
+        return;
+      }
+      chatBlock.chatSections.push(chatSection);
+    });
+    return chatBlocks;
   }
 
   submitNewGame() {
@@ -78,8 +109,8 @@ export default class DataStore {
       method: "POST",
       credentials: 'include',
     }, 3).then((responseResults: any[]) => {
-      const chatBlock = this.createChatBlockFromResponse(responseResults);
-      this.newGame(chatBlock);
+      const chatBlocks = this.createChatBlocksFromResponse(responseResults);
+      this.newGame(chatBlocks);
       //setWaitingForAnswer(false);
       //window.scrollTo(0, 0);
     });
@@ -96,21 +127,21 @@ export default class DataStore {
     }, 3).then((responseResults: any[]) => {
       //const responseResults = await value.json();
       console.log(responseResults);
-      const chatBlock = this.createChatBlockFromResponse(responseResults);
-      chatBlock.chatSections.unshift("> " + command)
-      this.addChatBlock(chatBlock);
+      const chatBlocks = this.createChatBlocksFromResponse(responseResults);
+      chatBlocks[0].chatSections.unshift("> " + command)
+      this.addChatBlocks(chatBlocks);
     })
   }
 
-  newGame(chatBlock: ChatBlock) {
+  newGame(chatBlocks: ChatBlock[]) {
     this.blocks.length = 0;
-    this.blocks.push(chatBlock);
-    this.currentBlockIndex = 0;
+    this.blocks = this.blocks.concat(chatBlocks);
+    this.currentBlockIndex = this.maxBlockIndex = 0;
   }
 
-  addChatBlock(chatBlock: ChatBlock) {
-    this.blocks.push(chatBlock);
-    this.currentBlockIndex = this.blocks.length-1;
+  addChatBlocks(chatBlocks: ChatBlock[]) {
+    this.currentBlockIndex = this.blocks.length;
+    this.blocks = this.blocks.concat(chatBlocks);
   }
 
   get currentBlock() {
@@ -122,6 +153,13 @@ export default class DataStore {
 
   goToLastPage() {
     this.goToPage(this.blocks.length-1);
+  }
+
+  goToNextPage() {
+    if (this.currentBlockIndex === this.blocks.length-1) {
+      throw Error("Tried to go to the next page when at the end");
+    }
+    this.goToPage(this.currentBlockIndex + 1);
   }
 
   goToPage(value:number) {
@@ -155,6 +193,19 @@ export default class DataStore {
       this.closeFeedback();
     }).catch((reason: any) => {
       this.closeFeedback();
+    });
+  }
+
+  addAlert(alert:GptifAlert) {
+    this.alerts.push(alert);
+  }
+
+  updateAlerts() {
+    this.alerts.forEach(alert => {
+      alert.duration -= 1;
+    });
+    this.alerts = this.alerts.filter((alert) => {
+      return alert.duration > 0;
     });
   }
 }
