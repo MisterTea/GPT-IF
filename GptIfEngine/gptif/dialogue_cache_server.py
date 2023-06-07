@@ -173,10 +173,10 @@ async def fetch_dialogue(query: GptDialogue) -> str:
 async def fetch_image_id_for_caption(query: AiImage) -> Optional[str]:
     ai_image = get_ai_image_if_cached(query)
     if ai_image is None:
-        image_data_bytes = generate_image(query.prompt)
+        image_data_bytes = generate_image(query)
 
         if image_data_bytes is None:
-            bugsnag.notify(Exception(f"Invalid DALL-E query: {query.prompt}"))
+            bugsnag.notify(Exception(f"Invalid image fetch query: {query.prompt}"))
             return None
         else:
             query.result = image_data_bytes

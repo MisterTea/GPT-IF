@@ -274,7 +274,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
   }
 
   return (
-    <div className="App">
+    <div className="App" style={{ marginTop: "16px" /* Cancel out the negative margin from grid */ }}>
       <Grid container spacing={2} alignItems="center"
         justifyContent="center">
         {gameContent}

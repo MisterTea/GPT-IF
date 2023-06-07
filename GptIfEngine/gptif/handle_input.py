@@ -224,7 +224,7 @@ def handle_input(world: World, command: str) -> bool:
                                 ):
                                     console.print(
                                         Markdown(
-                                            """```Good job!  You found out what Derrick likes to talk about and you mentioned it in your conversation.  This earned you a friend point with Derrick.  Keep earning friend points to make Derrick a permanent friend```"""
+                                            """```Good job!  You found out what Derrick likes to talk about and you mentioned it in your conversation.  This earned you a friend point with Derrick.  Earn one more friend point to make Derrick a permanent friend```"""
                                         )
                                     )
 

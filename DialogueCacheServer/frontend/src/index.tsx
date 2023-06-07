@@ -7,7 +7,7 @@ import '@fontsource/roboto/700.css';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import TwitterIcon from '@mui/icons-material/Twitter';
-import { AppBar, Box, CssBaseline, Link as MaterialLink, MenuItem, ThemeProvider, Toolbar, Typography, createTheme } from '@mui/material';
+import { AppBar, Box, CssBaseline, Link as MaterialLink, MenuItem, Paper, ThemeProvider, Toolbar, Typography, createTheme } from '@mui/material';
 import { observer } from 'mobx-react';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -54,7 +54,7 @@ const Root = observer(({ datastore }: { datastore: DataStore }) => {
 
   var playOrRestart = (
     <MenuItem key="/" onClick={() => { navigate("/"); }}>
-      <Typography textAlign="center">Play</Typography>
+      <Typography textAlign="center" variant="h6" component="div" sx={{ flexGrow: 1 }}>Play</Typography>
     </MenuItem>
   );
 
@@ -70,32 +70,35 @@ const Root = observer(({ datastore }: { datastore: DataStore }) => {
           datastore.addAlert(newAlert);
         });
       }}>
-        <Typography textAlign="center">Restart</Typography>
+        <Typography textAlign="center" variant="h6" component="div" sx={{ flexGrow: 1 }}>Restart</Typography>
       </MenuItem>
     );
   }
 
   return (<div>
     <Feedback datastore={datastore} />
-    <div className="Header">
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
-          <Toolbar>
-            {playOrRestart}
-            {/*<MenuItem key="about" onClick={() => { navigate("about"); }}>
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="static">
+        <Toolbar>
+          {playOrRestart}
+          {/*<MenuItem key="about" onClick={() => { navigate("about"); }}>
               <Typography textAlign="center">Learn</Typography>
   </MenuItem>*/}
-          </Toolbar>
-        </AppBar>
-      </Box>
-    </div>
+        </Toolbar>
+      </AppBar>
+    </Box>
     <Outlet />
-    <div className="Footer">
+    <Paper sx={{
+      marginTop: 'calc(10% + 60px)',
+      width: '100%',
+      position: 'fixed',
+      bottom: 0,
+    }} component="footer" square variant="outlined">
       Version {APP_VERSION}.  Made by Jason Gauci
       <MaterialLink href="https://twitter.com/neuralnets4life" target="_blank" rel="noopener"><TwitterIcon /></MaterialLink>
       <MaterialLink href="https://www.linkedin.com/in/jasongauci" target="_blank" rel="noopener"><LinkedInIcon /></MaterialLink>
       <MaterialLink href="#" onClick={() => { datastore.openFeedback(); }}><BugReportIcon /></MaterialLink>
-    </div>
+    </Paper>
   </div>);
 });
 

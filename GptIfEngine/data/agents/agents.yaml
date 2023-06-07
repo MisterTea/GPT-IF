@@ -59,6 +59,7 @@ taxi_driver:
     - bald
     - mustache
     - usually wears a taxi uniform
+    - Hispanic
     hobbies:
     - fishing
     - golfing
@@ -111,6 +112,7 @@ port_security_officer:
     - tattoo of an eagle on his arm
     - usually seen wearing a security uniform
     - also been known to wear jeans and a t-shirt when he's off duty
+    - African American
     hobbies:
     - spending time with family and friends
     - playing basketball
@@ -160,6 +162,8 @@ medical_doctor:
       - plump
       - wide smile
       - kind eyes
+      - Caucasian
+      - German
     hobbies:
       - reading
       - gardening
@@ -193,6 +197,8 @@ tour_guide:
       - slender
       - long brown hair
       - blue eyes
+      - Caucasian
+      - Italian
     hobbies:
       - reading C.S. Lewis
       - writing
@@ -232,6 +238,8 @@ vip_reporter:
       - Nancy is also a mischievous person, and she loves to get into trouble. She is always up for a good adventure, and she is not afraid to break the rules.
     physical appearance:
       - Nancy is a tall, slender woman with long, blonde hair and blue eyes. She is always well-dressed, and she has a confident air about her.
+      - Caucasian
+      - American
     hobbies:
       - Nancy loves to read, write, and travel. She is also an avid hiker and skier.
     goals:
@@ -277,6 +285,8 @@ ex_convict:
       - Today, Tiny Ed is a successful businessman. He is also a mentor to young people who are struggling with addiction.
     physical appearance:
       - Tiny Ed is a short, stocky man with a shaved head and a goatee. He has a kind smile and a warm demeanor.
+      - Caucasian
+      - American
     hobbies:
       - Tiny Ed enjoys reading, writing, and spending time with his family. He is also an avid runner.
     goals:
@@ -313,6 +323,7 @@ research_scientist:
       - slender
       - dark hair
       - blue eyes
+      - Caucasian
     hobbies:
       - reading
       - hiking
@@ -351,6 +362,7 @@ financier:
       - tall
       - handsome
       - well-dressed
+      - Jewish
     hobbies:
       - golf
       - tennis
@@ -384,6 +396,7 @@ mercenary:
       - muscular
       - short black hair
       - blue eyes
+      - African American
     hobbies:
       - playing chess
       - reading military history
@@ -421,6 +434,7 @@ captain:
       - muscular
       - salt and pepper hair
       - blue eyes
+      - Norwegian
     hobbies:
       - sailing
       - fishing
