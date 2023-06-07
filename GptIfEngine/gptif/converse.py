@@ -45,10 +45,11 @@ def put_answer_in_cache(dialogue: db.GptDialogue):
         db.put_answer_in_cache(dialogue)
 
 
-def profile_for_agent(agent:Agent) -> str:
+def profile_for_agent(agent: Agent) -> str:
     return f"""
 **Name:** {agent.profile.name}
 **Age:** {agent.profile.age}
+**Race:** {agent.profile.race}
 **Gender:** {agent.profile.gender}
 **Occupation:** {agent.profile.occupation}
 **Personality:** {". ".join(agent.profile.personality)}
@@ -56,6 +57,7 @@ def profile_for_agent(agent:Agent) -> str:
 **Goals:**   {". ".join(agent.profile.goals)}
 **Notes:**   {". ".join(agent.notes)}
 """
+
 
 def converse(target_agent: Agent, statement: str) -> Optional[str]:
     assert llm is not None
@@ -213,12 +215,11 @@ Object Description: """
     )
     return answer_text
 
-def describe_character(
-    agent:Agent
-) -> str:
+
+def describe_character(agent: Agent) -> str:
     assert llm is not None
 
-    question = f"""Given a character profile, write a description of the character
+    question = f"""Given a character profile, write a description of the character in a single paragraph. The description should include the age and race.
     
 Character:
 

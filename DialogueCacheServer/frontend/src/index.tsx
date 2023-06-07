@@ -50,8 +50,6 @@ const Root = observer(({ datastore }: { datastore: DataStore }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log(location.pathname);
-
   var playOrRestart = (
     <MenuItem key="/" onClick={() => { navigate("/"); }}>
       <Typography textAlign="center" variant="h6" component="div" sx={{ flexGrow: 1 }}>Play</Typography>

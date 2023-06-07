@@ -38,38 +38,39 @@ def display_image(image_data_bytes: bytes):
         print(output)
 
 
-def generate_image(query: AiImage) -> Optional[bytes]:
-    prompt = query.prompt
+def _generate_image_openai(prompt: str) -> Optional[bytes]:
+    try:
+        # Grab the ai_image from openai
+        import openai
 
-    if query.model_version == "dalle":
-        try:
-            # Grab the ai_image from openai
-            import openai
+        response = openai.Image.create(
+            prompt=prompt,
+            n=1,
+            size="512x512",
+            response_format="b64_json",
+        )
 
-            response = openai.Image.create(
-                prompt=prompt,
-                n=1,
-                size="512x512",
-                response_format="b64_json",
-            )
+        image_data_b64 = response["data"][0]["b64_json"]
+        image_data_bytes = base64.b64decode(image_data_b64)
+        return image_data_bytes
+    except Exception as ex:
+        console.debug(ex)
+        return None
 
-            image_data_b64 = response["data"][0]["b64_json"]
-            image_data_bytes = base64.b64decode(image_data_b64)
-            return image_data_bytes
-        except Exception as ex:
-            console.debug(ex)
-            return None
-    elif query.model_version == "stability_ai":
-        try:
-            print("IN STABILITY")
-            from stability_sdk import client
-            import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
+def _generate_image_stability(prompt: str) -> Optional[bytes]:
+    try:
+        from stability_sdk import client
+        import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
+
+        for engine in [
+            "stable-diffusion-xl-beta-v2-2-2",
+        ]:
             # Set up our connection to the API.
             stability_api = client.StabilityInference(
                 key=os.environ["STABILITY_KEY"],  # API Key reference.
                 verbose=True,  # Print debug messages.
-                engine="stable-diffusion-xl-beta-v2-2-2",  # Set the engine to use for generation.
+                engine=engine,  # Set the engine to use for generation.
                 # Available engines: stable-diffusion-v1 stable-diffusion-v1-5 stable-diffusion-512-v2-0 stable-diffusion-768-v2-0
                 # stable-diffusion-512-v2-1 stable-diffusion-768-v2-1 stable-diffusion-xl-beta-v2-2-2 stable-inpainting-v1-0 stable-inpainting-512-v2-0
             )
@@ -101,14 +102,60 @@ def generate_image(query: AiImage) -> Optional[bytes]:
                             "Your request activated the API's safety filters and could not be processed."
                             "Please modify the prompt and try again."
                         )
-                        return None
-                    if artifact.type == generation.ARTIFACT_IMAGE:
+                    elif artifact.type == generation.ARTIFACT_IMAGE:
                         return artifact.binary
-        except Exception as ex:
-            print("ERROR:")
-            print(ex)
-            console.debug(ex)
-            return None
+        return None
+    except Exception as ex:
+        print("ERROR:")
+        print(ex)
+        console.debug(ex)
+        return None
+
+
+def _generate_image_sd_hf(prompt: str) -> Optional[bytes]:
+    import requests
+
+    API_URL = (
+        "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1"
+    )
+    HF_KEY = os.environ["HUGGING_FACE_KEY"]
+    headers = {"Authorization": f"Bearer {HF_KEY}"}
+
+    def query(payload):
+        response = requests.post(API_URL, headers=headers, json=payload)
+        return response.content
+
+    image_bytes = query(
+        {
+            "inputs": prompt,
+        }
+    )
+
+    return image_bytes
+
+
+def generate_image(query: AiImage) -> Optional[bytes]:
+    prompt = query.prompt
+    print("GENERATE IMAGE WITH", query.model_version)
+    print(prompt)
+
+    if query.model_version == "dalle_with_waterfall":
+        generators = [
+            _generate_image_openai,
+            _generate_image_stability,
+            _generate_image_sd_hf,
+        ]
+        for g in generators:
+            result = g(prompt)
+            if result is not None:
+                return result
+        return None
+    elif query.model_version == "dalle":
+        return _generate_image_openai(prompt)
+    elif query.model_version == "stability_ai":
+        return _generate_image_stability(prompt)
+    elif query.model_version == "stablediffusion_hf":
+        return _generate_image_sd_hf(prompt)
     else:
         raise NotImplementedError(f"Invalid model type: {query.model_version}")
 
@@ -116,20 +163,17 @@ def generate_image(query: AiImage) -> Optional[bytes]:
 def display_image_for_prompt(prompt: str):
     # if gptif.settings.DEBUG_MODE == True:
     # return
-    query = AiImage(model_version="stability_ai", prompt=prompt)
+    query = AiImage(model_version="dalle_with_waterfall", prompt=prompt)
     if gptif.settings.CONVERSE_SERVER is None:
         ai_image = get_ai_image_if_cached(query)
         if ai_image is None:
             image_data_bytes = generate_image(query)
-            if image_data_bytes is not None:
-                query.result = image_data_bytes
-                put_ai_image_in_cache(query)
+            query.result = image_data_bytes
+            put_ai_image_in_cache(query)
 
-                assert query.id is not None
+            assert query.id is not None
 
-                ai_image_id = query.id
-            else:
-                ai_image_id = None
+            ai_image_id = query.id
         else:
             assert ai_image.id is not None
             ai_image_id = ai_image.id
@@ -143,8 +187,8 @@ def display_image_for_prompt(prompt: str):
         ai_image = get_ai_image_from_id(ai_image_id)
 
         assert ai_image is not None
-        assert ai_image.result is not None
-        display_image(ai_image.result)
+        if ai_image.result is not None:
+            display_image(ai_image.result)
 
     else:
         response = requests.post(

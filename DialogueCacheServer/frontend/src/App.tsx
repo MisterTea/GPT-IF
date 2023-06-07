@@ -208,8 +208,8 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
   }
 
   var gameImageHtml = null;
-  if (datastore.gameImageUrl !== null) {
-    gameImageHtml = <img src={datastore.gameImageUrl} alt="Logo" style={logoStyle} />;
+  if (datastore.currentBlock && datastore.currentBlock.imageUrl !== null) {
+    gameImageHtml = <img src={datastore.currentBlock.imageUrl} alt="Logo" style={logoStyle} />;
   }
 
   var gameContent;
@@ -274,7 +274,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
   }
 
   return (
-    <div className="App" style={{ marginTop: "16px" /* Cancel out the negative margin from grid */ }}>
+    <div className="App" style={{ marginTop: "16px", marginBottom: "32px" /* Cancel out the negative margin from grid */ }}>
       <Grid container spacing={2} alignItems="center"
         justifyContent="center">
         {gameContent}

@@ -38,6 +38,7 @@ class Gender(IntEnum):
 class AgentProfile:
     name: str
     age: Optional[int]
+    race: str
     gender: Optional[Gender]
     occupation: Optional[str]
     personality: Optional[List[str]]
@@ -51,6 +52,7 @@ class AgentProfile:
         return AgentProfile(
             profile_yaml["name"],
             profile_yaml["age"],
+            profile_yaml.get("race", "Caucasian"),
             profile_yaml["gender"],
             profile_yaml["occupation"],
             profile_yaml["personality"],
@@ -64,6 +66,7 @@ class AgentProfile:
         return AgentProfile(
             self.name,
             self.age,
+            self.race,
             self.gender,
             None,
             None,
@@ -354,11 +357,7 @@ class World:
         #         self.agents[agent_uid].upgrade(newer_world.agents[agent_uid])
 
     def ask_to_press_key(self):
-        if gptif.settings.DEBUG_MODE or not gptif.settings.CLI_MODE:
-            console.print("[blue]Press enter to continue...[/]")
-        else:
-            console.input("[blue]Press enter to continue...[/]")
-        console.print("\n")
+        console.ask_to_press_key()
 
     @property
     def current_room(self):
@@ -380,27 +379,35 @@ class World:
         return wait_duration
 
     def step(self):
-        self.time_in_room += 1
-        self.time_in_chapter += 1
-        for agent in self.agents.values():
-            if agent.room_id == self.current_room_id and len(agent.tic_creatives) > 0:
-                assert agent.percent_increase_per_tic.endswith("t")
-                agent.tic_percentage += cast(
-                    int, dice.roll(agent.percent_increase_per_tic, random=self.random)
+        console.step_mode = True
+        try:
+            self.time_in_room += 1
+            self.time_in_chapter += 1
+            for agent in self.agents.values():
+                if (
+                    agent.room_id == self.current_room_id
+                    and len(agent.tic_creatives) > 0
+                ):
+                    assert agent.percent_increase_per_tic.endswith("t")
+                    agent.tic_percentage += cast(
+                        int,
+                        dice.roll(agent.percent_increase_per_tic, random=self.random),
+                    )
+                    if agent.tic_percentage >= 100:
+                        agent.tic_percentage = 0
+                        # Pick a random tic
+                        self.play_sections(
+                            [random.choice(agent.tic_creatives)], "purple"
+                        )
+                agent.movement.step(agent)
+            if f"Tic {self.time_in_room}" in self.current_room.descriptions:
+                self.play_sections(
+                    self.current_room.descriptions[f"Tic {self.time_in_room}"], "purple"
                 )
-                if agent.tic_percentage >= 100:
-                    agent.tic_percentage = 0
-                    # Pick a random tic
-                    self.play_sections([random.choice(agent.tic_creatives)], "purple")
-            agent.movement.step(agent)
-        if f"Tic {self.time_in_room}" in self.current_room.descriptions:
-            self.play_sections(
-                self.current_room.descriptions[f"Tic {self.time_in_room}"], "purple"
-            )
 
-        if self.on_chapter == 4 and self.time_in_chapter == 7:
-            self.play_sections(
-                """Terrus pushes past David, making the older gentleman stumble and fall to one knee.  You run over to help David up as June spins around to face the tour.
+            if self.on_chapter == 4 and self.time_in_chapter == 7:
+                self.play_sections(
+                    """Terrus pushes past David, making the older gentleman stumble and fall to one knee.  You run over to help David up as June spins around to face the tour.
 
 **June**: Pardon me, sir, but the tour is still ongoing!
 
@@ -419,15 +426,17 @@ June pulls out a two-way radio and murmurs something unintelligible.
 After a few moments, the short conversation is over and June turns back to face the tour.
 
 **June**: Alright, let's hurry along then!  Please enjoy this area for a moment longer, then the tour will continue shortly.
-""".split(
-                    "{{< pagebreak >}}"
+    """.split(
+                        "{{< pagebreak >}}"
+                    )
                 )
-            )
-            self.agents["mercenary"].room_id = None
+                self.agents["mercenary"].room_id = None
 
-        if self.on_chapter == 4 and self.time_in_chapter == 20:
-            # Captain yell
-            self.start_ch5()
+            if self.on_chapter == 4 and self.time_in_chapter == 20:
+                # Captain yell
+                self.start_ch5()
+        finally:
+            console.step_mode = False
 
     def move_to(self, room_id):
         assert room_id in self.rooms
@@ -498,12 +507,20 @@ After a few moments, the short conversation is over and June turns back to face 
             agent.room_id = room.uid
 
     def look(self):
+        if console.step_mode:
+            console.step_mode = False
+            console.ask_to_press_key()
+
         self.print_header()
         self.play_sections(self.current_room.descriptions["Long"], markdown=True)
         display_image_for_prompt(self.current_room.descriptions["Long"][0])
         self.print_footer()
 
     def look_quickly(self):
+        if console.step_mode:
+            console.step_mode = False
+            console.ask_to_press_key()
+
         self.print_header()
         self.play_sections(self.current_room.descriptions["Short"], markdown=True)
         display_image_for_prompt(self.current_room.descriptions["Long"][0])
@@ -879,6 +896,14 @@ class TourGuideMovementScript(MovementScript):
                     else world.go(direction)
                     for agent in tour_group
                 ]
+
+                # Once we have arrived, have June give a speech
+                if world.current_room_id == "mess_hall_hallway":
+                    console.print(
+                        Markdown(
+                            "**June:** This corridor leads to the mess hall, where the crew can recover after a long shift."
+                        )
+                    )
 
 
 @dataclass

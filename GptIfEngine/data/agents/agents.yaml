@@ -43,6 +43,7 @@ taxi_driver:
     name: Juan
     age: 45
     gender: male
+    race: Hispanic
     occupation: Taxi Driver
     personality:
     - friendly
@@ -59,7 +60,6 @@ taxi_driver:
     - bald
     - mustache
     - usually wears a taxi uniform
-    - Hispanic
     hobbies:
     - fishing
     - golfing
@@ -91,6 +91,7 @@ port_security_officer:
     name: Derrick Williams
     age: 35
     gender: male
+    race: African American
     occupation: Port Security Officer
     personality:
     - no-nonsense
@@ -112,7 +113,6 @@ port_security_officer:
     - tattoo of an eagle on his arm
     - usually seen wearing a security uniform
     - also been known to wear jeans and a t-shirt when he's off duty
-    - African American
     hobbies:
     - spending time with family and friends
     - playing basketball
@@ -151,6 +151,7 @@ medical_doctor:
     name: Doctor Sue
     age: 45
     gender: female
+    race: German
     occupation: doctor
     personality:
       - kind
@@ -162,8 +163,6 @@ medical_doctor:
       - plump
       - wide smile
       - kind eyes
-      - Caucasian
-      - German
     hobbies:
       - reading
       - gardening
@@ -181,6 +180,7 @@ tour_guide:
     name: June Hope
     age: 35
     gender: female
+    race: Italian
     occupation: cruise ship VIP tour guide
     personality:
       - kind
@@ -197,8 +197,6 @@ tour_guide:
       - slender
       - long brown hair
       - blue eyes
-      - Caucasian
-      - Italian
     hobbies:
       - reading C.S. Lewis
       - writing
@@ -225,6 +223,7 @@ vip_reporter:
     name: Nancy Smith
     age: 35
     gender: female
+    race: Caucasian
     occupation: reporter
     personality:
       - mischievous
@@ -238,8 +237,6 @@ vip_reporter:
       - Nancy is also a mischievous person, and she loves to get into trouble. She is always up for a good adventure, and she is not afraid to break the rules.
     physical appearance:
       - Nancy is a tall, slender woman with long, blonde hair and blue eyes. She is always well-dressed, and she has a confident air about her.
-      - Caucasian
-      - American
     hobbies:
       - Nancy loves to read, write, and travel. She is also an avid hiker and skier.
     goals:
@@ -253,7 +250,7 @@ vip_reporter:
     starting_room: vip_lounge
     script_id: nancy
   Tics:
-    percent_increase_per_tick: 100d1t
+    percent_increase_per_tick: 10d5t
     creative:
       - "Nancy: (to herself) I wonder what's going on in this part of the ship."
       - Nancy repeatedly clicks her pen open and closed.
@@ -273,6 +270,7 @@ ex_convict:
     age: 30
     gender: male
     occupation: barista
+    race: Caucasian
     personality:
       - kind-hearted
       - compassionate
@@ -285,14 +283,13 @@ ex_convict:
       - Today, Tiny Ed is a successful businessman. He is also a mentor to young people who are struggling with addiction.
     physical appearance:
       - Tiny Ed is a short, stocky man with a shaved head and a goatee. He has a kind smile and a warm demeanor.
-      - Caucasian
-      - American
     hobbies:
       - Tiny Ed enjoys reading, writing, and spending time with his family. He is also an avid runner.
     goals:
       - Tiny Ed's goal is to help others who are struggling with addiction. He wants to use his story to inspire others to turn their lives around.
   friend_questions:
     - Is the statement above about prison reform?
+    - Is the statement above about addiction?
   movement:
     starting_room: vip_lounge
     script_id: vip_tour_guest
@@ -344,6 +341,7 @@ financier:
     name: James Carrington
     age: 45
     gender: male
+    race: Jewish
     occupation: financier
     personality:
       - intelligent
@@ -362,7 +360,6 @@ financier:
       - tall
       - handsome
       - well-dressed
-      - Jewish
     hobbies:
       - golf
       - tennis
@@ -379,6 +376,7 @@ mercenary:
     name: Terrus Black
     age: 35
     gender: male
+    race: African American
     occupation: mercenary
     personality:
       - cold
@@ -396,7 +394,6 @@ mercenary:
       - muscular
       - short black hair
       - blue eyes
-      - African American
     hobbies:
       - playing chess
       - reading military history

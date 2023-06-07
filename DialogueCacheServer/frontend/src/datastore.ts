@@ -24,7 +24,6 @@ export class ChatBlock {
 export default class DataStore {
   blocks: ChatBlock[] = [];
   maxBlockIndex: number = -1;
-  gameImageUrl: string | null = null;
   feedbackModal: boolean = false;
   _currentBlockIndex: number = -1;
 
@@ -55,10 +54,6 @@ export default class DataStore {
     }
   }
 
-  setGameImage(image_url: string) {
-    this.gameImageUrl = image_url;
-  }
-
   createChatBlocksFromResponse(responseResults: any[]) {
     const chatBlocks = []
     var chatBlock = new ChatBlock();
@@ -82,11 +77,7 @@ export default class DataStore {
         responseText = responseText.replaceAll("[" + acceptedTag + "]", "<span class=\"game_markdown_" + acceptedTag.replaceAll(" ", "_") + "\">")
       });
       if (responseText.includes("%%IMAGE%%")) {
-        const image_id = responseText.split(" ")[1];
-        const image_url = API_SERVER_BASE + "api/ai_image/" + image_id;
-        console.log("GOT IMAGE: " + image_url);
-        this.setGameImage(image_url);
-        return null;
+        return responseText;
       }
 
       return Marked.parse(responseText);
@@ -96,6 +87,13 @@ export default class DataStore {
       if (chatSection.includes("Press enter to continue...")) {
         chatBlock = new ChatBlock();
         chatBlocks.push(chatBlock);
+        return;
+      }
+      if(chatSection.includes("%%IMAGE%%")) {
+        const image_id = chatSection.split(" ")[1];
+        const image_url = API_SERVER_BASE + "api/ai_image/" + image_id;
+        console.log("GOT IMAGE: " + image_url);
+        chatBlock.imageUrl = image_url;
         return;
       }
       chatBlock.chatSections.push(chatSection);

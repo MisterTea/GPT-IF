@@ -122,6 +122,7 @@ class ConsoleHandler:
     def __init__(self):
         self._console = Console()
         self.buffers: Dict[str, List[Tuple[str, Optional[str]]]] = {}
+        self.step_mode = False
 
     def get_input(self, prompt: str) -> str:
         if len(DEBUG_INPUT) > 0:
@@ -161,7 +162,7 @@ class ConsoleHandler:
         return self._console.input(prompt)
 
     def debug(self, *objects: Any):
-        if gptif.settings.DEBUG_MODE is True:
+        if gptif.settings.DEBUG_MODE is True or gptif.settings.CLI_MODE is False:
             self._console.print(*objects, style="bright_black on black")
 
     def warning(self, *objects: Any):
@@ -169,6 +170,13 @@ class ConsoleHandler:
         if gptif.settings.DEBUG_MODE:
             # Shouldn't get warnings in debug mode...
             self.print("Got a warning in debug mode")
+
+    def ask_to_press_key(self):
+        if gptif.settings.DEBUG_MODE or not gptif.settings.CLI_MODE:
+            self.print("[blue]Press enter to continue...[/]")
+        else:
+            self.input("[blue]Press enter to continue...[/]")
+        self.print("\n")
 
 
 console = ConsoleHandler()

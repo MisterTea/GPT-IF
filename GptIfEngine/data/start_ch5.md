@@ -44,4 +44,4 @@ And with that, folks begin to disperse. You make your way back to the atrium, wh
 
 {{< pagebreak >}}
 
-{{ world.move_to("atrium") }}
+%%{{ world.move_to("atrium") }}%%
