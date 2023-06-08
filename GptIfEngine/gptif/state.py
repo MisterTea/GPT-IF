@@ -428,7 +428,8 @@ After a few moments, the short conversation is over and June turns back to face 
 **June**: Alright, let's hurry along then!  Please enjoy this area for a moment longer, then the tour will continue shortly.
     """.split(
                         "{{< pagebreak >}}"
-                    )
+                    ),
+                    insert_pauses=True,
                 )
                 self.agents["mercenary"].room_id = None
 
@@ -481,7 +482,9 @@ After a few moments, the short conversation is over and June turns back to face 
             result_without_tokens, tokens = self.parse(exit.prescript)
 
             if len(result_without_tokens) > 0:
-                self.play_sections(result_without_tokens.split("{{< pagebreak >}}"))
+                self.play_sections(
+                    result_without_tokens.split("{{< pagebreak >}}"), insert_pauses=True
+                )
             if "False" in tokens:
                 return False
         self.move_to(exit.room_uid)
@@ -505,6 +508,9 @@ After a few moments, the short conversation is over and June turns back to face 
             agent.room_id = None
         else:
             agent.room_id = room.uid
+
+    def render_image(self, prompt: str):
+        display_image_for_prompt(prompt)
 
     def look(self):
         if console.step_mode:
@@ -612,6 +618,11 @@ After a few moments, the short conversation is over and June turns back to face 
         console.print(Markdown("""**People Here:**\n""" + "\n".join(agent_text)))
         console.print()
 
+    def describe_agent(self, agent: Agent):
+        from gptif.converse import describe_character
+
+        return describe_character(agent)
+
     def act_on(self, verb: str, look_object: str) -> bool:
         from gptif.converse import describe_character
 
@@ -623,7 +634,9 @@ After a few moments, the short conversation is over and June turns back to face 
                 if agent.answers_to_name(look_object_root):
                     if agent.room_id == self.current_room_id:
                         description = describe_character(agent)
-                        display_image_for_prompt(description)
+                        display_image_for_prompt(
+                            "Portrait of character with description: " + description
+                        )
                         self.play_sections([description])
                         return True
 
@@ -668,13 +681,17 @@ After a few moments, the short conversation is over and June turns back to face 
         return False
 
     def play_sections(
-        self, sections: List[str], style: Optional[str] = None, markdown: bool = True
+        self,
+        sections: List[str],
+        style: Optional[str] = None,
+        markdown: bool = True,
+        insert_pauses: bool = False,
     ):
         for i, section in enumerate(sections):
+            if i > 0 and insert_pauses:
+                console.enqueue_ask_to_press_key()
             paragraph, tokens = self.parse(section)
             if len(paragraph) > 0 and paragraph != "None":
-                if i > 0:
-                    world.ask_to_press_key()
                 if markdown:
                     console.print(Markdown(paragraph), style=style)
                 else:
@@ -700,6 +717,7 @@ Derrick quickly scans your paperwork and hands you your room key.
                     "{{< pagebreak >}}"
                 ),
                 "yellow",
+                insert_pauses=True,
             )
         elif agent.uid == "research_scientist":
             if self.on_chapter >= 6:
@@ -743,8 +761,10 @@ Nancy beams a large smile to you.  She has a smile that can make boulders give u
 
         with open("data/start_ch1.md", "r") as fp:
             sections = fp.read().split("{{< pagebreak >}}")
-            self.play_sections(sections)
-            self.look()
+            self.play_sections(sections, insert_pauses=True)
+
+        # Don't enqueue a press_key.  This needs to be cleared manually because it's only cleared in handle_input and this is the one command without input
+        console.enqueue_press_key = False
 
     def start_ch2(self):
         self.active_agents = set(
@@ -758,7 +778,7 @@ Nancy beams a large smile to you.  She has a smile that can make boulders give u
 
         with open("data/start_ch2.md", "r") as fp:
             sections = fp.read().split("{{< pagebreak >}}")
-            self.play_sections(sections)
+            self.play_sections(sections, insert_pauses=True)
 
     def start_ch3(self):
         self.active_agents.update(
@@ -777,7 +797,7 @@ Nancy beams a large smile to you.  She has a smile that can make boulders give u
 
         with open("data/start_ch3.md", "r") as fp:
             sections = fp.read().split("{{< pagebreak >}}")
-            self.play_sections(sections)
+            self.play_sections(sections, insert_pauses=True)
 
     def start_ch4(self):
         self.on_chapter = 4
@@ -789,7 +809,7 @@ Nancy beams a large smile to you.  She has a smile that can make boulders give u
 
         with open("data/start_ch5.md", "r") as fp:
             sections = fp.read().split("{{< pagebreak >}}")
-            self.play_sections(sections)
+            self.play_sections(sections, insert_pauses=True)
 
         # Move some agents around
         self.agents["vip_reporter"].room_id = "pool_deck"
@@ -803,7 +823,7 @@ Nancy beams a large smile to you.  She has a smile that can make boulders give u
 
         with open("data/start_ch6.md", "r") as fp:
             sections = fp.read().split("{{< pagebreak >}}")
-            self.play_sections(sections)
+            self.play_sections(sections, insert_pauses=True)
 
     def start_ch7(self):
         self.on_chapter = 7
@@ -811,7 +831,7 @@ Nancy beams a large smile to you.  She has a smile that can make boulders give u
 
         with open("data/start_ch7.md", "r") as fp:
             sections = fp.read().split("{{< pagebreak >}}")
-            self.play_sections(sections)
+            self.play_sections(sections, insert_pauses=True)
 
     def check_can_board_ship(self):
         if self.friends_with("port_security_officer"):

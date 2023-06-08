@@ -161,6 +161,7 @@ def generate_image(query: AiImage) -> Optional[bytes]:
 
 
 def display_image_for_prompt(prompt: str):
+    print("DISPLAYING IMAGE FOR PROMPT", prompt)
     # if gptif.settings.DEBUG_MODE == True:
     # return
     query = AiImage(model_version="dalle_with_waterfall", prompt=prompt)
@@ -213,6 +214,9 @@ def display_image_for_prompt(prompt: str):
             assert response.status_code == 200
 
             # print(response.content)
+            if not gptif.settings.CLI_MODE:
+                console.print(f"%%IMAGE%% {image_id}")
+                return
 
             # image_data_b64 = response["data"][0]["b64_json"]
             # image_data_bytes = base64.b64decode(image_data_b64)

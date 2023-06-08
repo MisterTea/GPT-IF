@@ -123,6 +123,7 @@ class ConsoleHandler:
         self._console = Console()
         self.buffers: Dict[str, List[Tuple[str, Optional[str]]]] = {}
         self.step_mode = False
+        self.enqueue_press_key = False
 
     def get_input(self, prompt: str) -> str:
         if len(DEBUG_INPUT) > 0:
@@ -138,7 +139,14 @@ class ConsoleHandler:
         self._console.print("\n")
         return x
 
+    def _pop_ask_to_press_key(self):
+        if self.enqueue_press_key is False:
+            return
+        self.enqueue_press_key = False
+        self.ask_to_press_key()
+
     def print(self, *objects: Any, style: Optional[str] = None):
+        self._pop_ask_to_press_key()
         session_id = session_id_contextvar.get()
         if len(session_id) > 0:
             if session_id not in self.buffers:
@@ -166,10 +174,14 @@ class ConsoleHandler:
             self._console.print(*objects, style="bright_black on black")
 
     def warning(self, *objects: Any):
+        self._pop_ask_to_press_key()
         self.print(*objects, style="red on black")
         if gptif.settings.DEBUG_MODE:
             # Shouldn't get warnings in debug mode...
             self.print("Got a warning in debug mode")
+
+    def enqueue_ask_to_press_key(self):
+        self.enqueue_press_key = True
 
     def ask_to_press_key(self):
         if gptif.settings.DEBUG_MODE or not gptif.settings.CLI_MODE:

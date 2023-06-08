@@ -35,7 +35,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       console.log("CLEARING");
       commandValueRef.current.value = "";
       setWaitingForAnswer(false);
-      if (datastore.blocks.length === 3) {
+      if (datastore.blocks.length >= 10) {
         datastore.openChatFeedbackOnce();
         //datastore.openFeedback();
       }
@@ -87,8 +87,20 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
       datastore.updateAlerts();
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, [datastore, submitNewGame]);
+    const eventListener = () => {
+      console.log("GOING TO NEXT PAGE");
+      if (datastore.currentBlockIndex < datastore.blocks.length - 1) {
+        datastore.goToNextPage();
+      }
+    };
+
+    window.addEventListener("keydown", eventListener);
+
+    return () => {
+      window.removeEventListener("keydown", eventListener);
+      clearInterval(interval);
+    }
+  }, [datastore, submitNewGame, window]);
 
   var game_text = null;
   if (datastore.currentBlock !== null) {
