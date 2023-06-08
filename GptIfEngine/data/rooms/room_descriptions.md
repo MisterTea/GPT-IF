@@ -7,7 +7,7 @@ It's a beautiful day in Tampa, and you're excited to be taking a taxi to the cru
 ## Tic 1
 
 ```
-If you haven't yet, try LOOKing at something.  For example, you can LOOK AT THE TERMINAL.  Things that are of particular interest are highlighted in **bold**, but you can look at anything!
+If you haven't yet, try LOOKing at something.  For example, you can LOOK AT THE TERMINAL.  Things that are of particular interest are highlighted in **bold**, but you can look at anything!  You can also LOOK AT JUAN to see your driver in more detail (including a photo).
 ```
 
 ## Tic 2

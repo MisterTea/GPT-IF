@@ -267,7 +267,6 @@ Tips:
 - Look at anything highlighted in **bold**.  Some of these items have special clues!
 - Try to make as many friends as possible."""
         )
-        console.ask_to_press_key()
     else:
         try:
             direct_object = get_direct_object(command)

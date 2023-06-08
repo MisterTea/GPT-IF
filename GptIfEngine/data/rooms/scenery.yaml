@@ -28,8 +28,7 @@ taxi:
   hints:
     - taxi
   names:
-    - wheeled_vehicle.n.01
-    - vehicle.n.01
+    - car.n.01
   rooms:
     - driving_to_terminal
 

@@ -99,6 +99,11 @@ export default class DataStore {
       }
       chatBlock.chatSections.push(chatSection);
     });
+
+    if (chatBlocks[chatBlocks.length-1].chatSections.length === 0) {
+      // Delete the last section if it is empty
+      chatBlocks.pop();
+    }
     return chatBlocks;
   }
 
