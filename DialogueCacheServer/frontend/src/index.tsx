@@ -92,10 +92,12 @@ const Root = observer(({ datastore }: { datastore: DataStore }) => {
       position: 'fixed',
       bottom: 0,
     }} component="footer" square variant="outlined">
-      Version {APP_VERSION}.  Made by Jason Gauci
+      Made by Jason Gauci
       <MaterialLink href="https://twitter.com/neuralnets4life" target="_blank" rel="noopener"><TwitterIcon /></MaterialLink>
       <MaterialLink href="https://www.linkedin.com/in/jasongauci" target="_blank" rel="noopener"><LinkedInIcon /></MaterialLink>
       <MaterialLink href="#" onClick={() => { datastore.openFeedback(); }}><BugReportIcon /></MaterialLink>
+      <br />
+      Version {APP_VERSION}
     </Paper>
   </div>);
 });

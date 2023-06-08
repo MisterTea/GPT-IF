@@ -744,6 +744,7 @@ Nancy beams a large smile to you.  She has a smile that can make boulders give u
         with open("data/start_ch1.md", "r") as fp:
             sections = fp.read().split("{{< pagebreak >}}")
             self.play_sections(sections)
+            self.look()
 
     def start_ch2(self):
         self.active_agents = set(

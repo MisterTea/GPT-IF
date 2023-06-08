@@ -219,7 +219,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
     gameContent = (
       <React.Fragment>
         <Stack spacing={2} textAlign='center' alignItems="center"
-          justifyContent="center">
+          justifyContent="center" paddingTop="32px" paddingBottom="32px">
           <Container maxWidth="md">
             <Paper elevation={3} style={{ padding: "10px", margin: "10px" }}>
               <Typography style={{ padding: "10px" }}>
