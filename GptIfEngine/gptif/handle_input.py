@@ -251,7 +251,23 @@ def handle_input(world: World, command: str) -> bool:
         else:
             world.persuade(target_agent)
     elif verb.lower() == "help":
-        console.print("TODO: HELP")
+        console.print(
+            """Welcome to Fortuna's Folly!
+
+Important Commands with examples:
+
+**Movement:** _go north_, _north_, _n_ all work to move north.
+
+**Looking:** _look_, _look at Juan_, _look at River_ all for examining.  LOOKing at things is a critical part of the game and can advance the story.
+
+**Talking:** _tell Juan "Hello!"_, _ask Juan "Where did you grow up?"_, _tell officer "Tell me about your time in Iraq."_
+
+Tips:
+
+- Look at anything highlighted in **bold**.  Some of these items have special clues!
+- Try to make as many friends as possible."""
+        )
+        console.ask_to_press_key()
     else:
         try:
             direct_object = get_direct_object(command)
