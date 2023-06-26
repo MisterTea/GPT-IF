@@ -116,11 +116,11 @@ The suite is divided into several different areas, each with its own unique purp
 
 The suite also has a number of amenities that make it feel like a home away from home. There is a fully stocked minibar, a coffee maker, and a microwave. There is also a safe and a hairdryer.  The safe attracts your attention.
 
-The safe happily buzzes as a security question scrolls on the 7-segment display: **YOUR SECURITY HINT IS: EVERY LETTER IN IT'S PLACE.  PLEASE TELL ME THE PASSWORD**
+The safe happily buzzes as a security question scrolls on the 7-segment display: **YOUR SECURITY HINT IS: I AM OWNED BY THE POOR AND THE RICH DON'T NEED ME.  PLEASE TELL ME THE PASSWORD**
 
 ## Short
 
-James Carrington's stateroom is a spacious, opulent suite with stunning views of the ocean.  A safe in this room attracts your attention. The safe happily buzzes as a security question scrolls on the 7-segment display: **YOUR SECURITY HINT IS: EVERY LETTER IN IT'S PLACE.  PLEASE TELL ME THE PASSWORD**
+James Carrington's stateroom is a spacious, opulent suite with stunning views of the ocean.  A safe in this room attracts your attention. The safe happily buzzes as a security question scrolls on the 7-segment display: **YOUR SECURITY HINT IS: I AM OWNED BY THE POOR AND THE RICH DON'T NEED ME.  PLEASE TELL ME THE PASSWORD**
 
 # theater
 
@@ -136,7 +136,7 @@ The Fortuna Theater is the perfect place to enjoy a show, a movie, or a presenta
 
 ## Long
 
-You are standing on the Pool Deck of the Fortuna cruise ship. The deck is a large and sunny area with a swimming pool, two hot tubs, and several sun loungers. There is a bar and grill on the pool deck, and there is also a children's pool and a water park. The air is filled with the sound of laughter and splashing, and the smell of suntan lotion hangs in the air. You can hear the waves crashing against the side of the ship, and the sun is shining brightly overhead. It's a perfect day to relax and enjoy the pool.
+You are standing on the Pool Deck of the Fortuna cruise ship. The deck is a large and sunny area with a **swimming pool**, two hot tubs, and several sun loungers. There is a bar and grill on the pool deck, and there is also a children's pool and a water park. The air is filled with the sound of laughter and splashing, and the smell of suntan lotion hangs in the air. You can hear the waves crashing against the side of the ship, and the sun is shining brightly overhead. It's a perfect day to relax and enjoy the pool.
 
 ## Short
 
@@ -171,6 +171,8 @@ The Fortuna VIP Lounge is a luxurious and exclusive space for guests of the Fort
 A tall man with dark hair and eyes uses a short staircase as a stage and clears his throat. The hum dies down. You recognize the man instantly as James Carrington, the owner of the Fortuna.
 
 James Carrington is a 45-year-old financier. He is tall, handsome, and well-dressed. James was born into a wealthy family and attended Harvard University, where he earned a degree in business. After graduating from Harvard, James went to work on Wall Street. He quickly rose through the ranks, and by the time he was 30, he was a multi-millionaire. However, James's luck soon changed. He made a series of bad investments, and by the time he was 45, he was facing bankruptcy. James is now determined to rebuild his financial empire. His drive and energy is infectious: before he even begins speaking, you feel compelled to take up arms and join him on any quest.
+
+{{< pagebreak >}}
 
 **James:** Good evening, ladies and gentlemen. Welcome aboard the Fortuna, my newest and most luxurious cruise ship. I'm James Carrington, the owner and operator of this ship, and I'm honored to have you all here.
 

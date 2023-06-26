@@ -142,9 +142,21 @@ The fountain is surrounded by a walkway, and you can walk around it to get a clo
 
 You stand for a moment, enjoying the peace and tranquility of the fountain. It is a welcome respite from the hustle and bustle of the ship. You take a deep breath of the fresh air, and you feel your stress start to melt away.
 
-Then something at the bottom of the fountain basin catches your eye: the tiles are arranged in a mosiac forming the letter **p**.  You make a mental note of this.
+Then something at the bottom of the fountain basin catches your eye: the tiles are arranged in a mosiac forming the code **P-1**.  You make a mental note of this.
 
 %%{{ world.password_letters_found.add("p") }}%%
+
+# pool
+
+## look
+
+You walk over to the pool and see that it is a large, rectangular pool with a diving board at one end. There are several lounge chairs scattered around the pool, and some people are sunbathing while others are swimming.
+
+As you sit there, you take in the view. You can see the ocean stretching out in front of you, and you can even see some dolphins swimming in the distance. You close your eyes and enjoy the feeling of the sun on your skin and the sound of the waves crashing against the side of the ship.
+
+As your gaze wanders over the pool, you notice something strange about the depth markers.  The shallow end markers say 3-FT, meaning three feet deep.  The deep markers show 6-FT, but in the middle there's a pair of evenly-matched markers showing simply ***R-5***.
+
+%%{{ world.password_letters_found.add("r") }}%%
 
 # gym_locker
 
@@ -177,7 +189,7 @@ You and David stare at the painting together and start making mental notes of th
 
 **Alfred:** A letter.
 
-**Both:** y!  It's a lowercase "y"!
+**Both:** y!  It's a lowercase "y"!  The painting has a hidden **Y-7** in it!  So peculiar!
 
 **David:** Haha, even on a stuffy ship like this, we can find an artist with a good grasp of physics and a sense of humor!
 

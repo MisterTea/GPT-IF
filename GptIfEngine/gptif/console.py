@@ -46,6 +46,7 @@ DEBUG_INPUT = [
     '"ocean"',  # Telling the safe the password
     "e",
     "u",
+    "look at the pool",
     "u",
     "d",
     'TELL captain "When did you become a captain?"',
@@ -112,7 +113,9 @@ DEBUG_INPUT = [
     "w",
     "u",
     "persuade nancy",
-    #'"poverty"',
+    "d",
+    "e",
+    '"poverty"',
 ]
 
 session_id_contextvar = contextvars.ContextVar("session_id", default="")

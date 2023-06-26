@@ -132,7 +132,7 @@ port_security_officer:
 
 
   Tics:
-    percent_increase_per_tick: 100d1t
+    percent_increase_per_tick: 10d5t
     creative:
       - Derrick Williams, the port security officer, taps his foot nervously as he waits for the next ship to arrive. He's been on the job for five years now, and he's seen his fair share of trouble. But there's something about this particular ship that has him on edge.
       - Derrick can't help but bite his nails as he scans the horizon for any sign of trouble. He knows that it's a bad habit, but he can't seem to break it. Maybe it's because he's so stressed out all the time.
@@ -288,7 +288,7 @@ ex_convict:
     goals:
       - Tiny Ed's goal is to help others who are struggling with addiction. He wants to use his story to inspire others to turn their lives around.
   friend_questions:
-    - Is the statement above about prison reform?
+    - Is the statement above about prison?
     - Is the statement above about addiction?
   movement:
     starting_room: vip_lounge

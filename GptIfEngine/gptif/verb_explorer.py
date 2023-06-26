@@ -12,4 +12,4 @@ from nltk.corpus import verbnet
 
 from nltk.corpus import wordnet
 
-print([x.hypernym_paths() for x in wordnet.synsets("taxi")])
+print([x.hypernym_paths() for x in wordnet.synsets("pool")])

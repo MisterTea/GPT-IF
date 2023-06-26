@@ -109,6 +109,15 @@ atrium_fountain:
   rooms:
     - atrium
 
+pool:
+  hints:
+    - pool
+  names:
+    - pool.n.01
+    - pool.n.06
+  rooms:
+    - pool_deck
+
 gym_locker:
   hints:
     - locker

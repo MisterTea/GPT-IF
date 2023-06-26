@@ -173,8 +173,15 @@ def handle_input(world: World, command: str) -> bool:
                     if statement.strip('"').lower() == "ocean":
                         if "VIP Pass" not in world.inventory:
                             console.print(
-                                "The safe whirrs as the metal bolt receeds.  The door swings open and you grab the vip pass.  You close the safe and the bolt locks the safe shut."
+                                "The safe whirrs as the metal bolt receeds.  The door swings open and you grab the vip pass."
                             )
+                            console.print(
+                                "As you reach to close the safe, you notice the code 'O-2' etched into the back of the safe."
+                            )
+                            console.print(
+                                "You close the safe and the bolt locks the safe shut."
+                            )
+                            world.password_letters_found.add("o")
                             world.inventory.append("VIP Pass")
                         else:
                             console.print("The safe opens but it is empty")

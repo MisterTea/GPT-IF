@@ -402,7 +402,9 @@ class World:
                 agent.movement.step(agent)
             if f"Tic {self.time_in_room}" in self.current_room.descriptions:
                 self.play_sections(
-                    self.current_room.descriptions[f"Tic {self.time_in_room}"], "purple"
+                    self.current_room.descriptions[f"Tic {self.time_in_room}"],
+                    "purple",
+                    insert_pauses=True,
                 )
 
             if self.on_chapter == 4 and self.time_in_chapter == 7:
@@ -519,7 +521,9 @@ After a few moments, the short conversation is over and June turns back to face 
 
         self.print_header()
         self.play_sections(self.current_room.descriptions["Long"], markdown=True)
-        display_image_for_prompt(self.current_room.descriptions["Long"][0])
+        display_image_for_prompt(
+            self.current_room.descriptions["Long"][0].split("\n\n")[0]
+        )
         self.print_footer()
 
     def look_quickly(self):
@@ -529,7 +533,9 @@ After a few moments, the short conversation is over and June turns back to face 
 
         self.print_header()
         self.play_sections(self.current_room.descriptions["Short"], markdown=True)
-        display_image_for_prompt(self.current_room.descriptions["Long"][0])
+        display_image_for_prompt(
+            self.current_room.descriptions["Long"][0].split("\n\n")[0]
+        )
         self.print_footer()
 
     @property
@@ -559,7 +565,12 @@ After a few moments, the short conversation is over and June turns back to face 
             if "owner_stateroom" not in world.visited_rooms:
                 return "Going to James Carrington's VIP room"
             else:
-                password_string = ",".join(list(self.password_letters_found))
+                password_string = ",".join(
+                    [
+                        x.upper() + "-" + str("poverty".index(x) + 1)
+                        for x in list(self.password_letters_found)
+                    ]
+                )
                 return f"Solving James Carrington's Safe Puzzle ({password_string})"
 
         return None
@@ -661,7 +672,9 @@ After a few moments, the short conversation is over and June turns back to face 
                 if scenery_action is not None:
                     self.play_sections(scenery.actions[scenery_action], "yellow")
                     if verb == "look":
-                        display_image_for_prompt(scenery.actions[scenery_action][0])
+                        display_image_for_prompt(
+                            scenery.actions[scenery_action][0].split("\n\n")[0]
+                        )
                     return True
 
         if verb == "look" and gptif.settings.FAKE_SCENERY:
@@ -740,7 +753,7 @@ Nancy beams a large smile to you.  She has a smile that can make boulders give u
 
 **Alfred:** Really?  What have you seen?
 
-**Nancy:** Well it's mostly a rumor, but I have been talking to the crew and they all have the letter 'v' etched into the crew bunks.  People have heard rumors of other letters around.  Let me know if you find anything!
+**Nancy:** Well it's mostly a rumor, but I have been talking to the crew and they all have the code 'V-3' etched into the crew bunks.  People have heard rumors of other letters around.  Let me know if you find anything!
 
 **Alfred:** Will do, thanks Nancy!
 """
@@ -923,6 +936,30 @@ class TourGuideMovementScript(MovementScript):
                     console.print(
                         Markdown(
                             "**June:** This corridor leads to the mess hall, where the crew can recover after a long shift."
+                        )
+                    )
+                elif world.current_room_id == "atrium":
+                    console.print(
+                        Markdown(
+                            "**June:** This is the first room that guests see when they board The Fortuna.  The fountain is truly opulent."
+                        )
+                    )
+                elif world.current_room_id == "promenade":
+                    console.print(
+                        Markdown(
+                            "**June:** After the tour, be sure to sample some of our finest liquors at The Buoyant Bartender."
+                        )
+                    )
+                elif world.current_room_id == "stateroom_deck":
+                    console.print(
+                        Markdown(
+                            "**June:** I hope you all are enjoying your luxury staterooms. It's truly a magical experience."
+                        )
+                    )
+                elif world.current_room_id == "pool_deck":
+                    console.print(
+                        Markdown(
+                            "**June:** The hot tubs are particularly popular close to sunset of rest and relaxation.  Sunset is around 7:50pm today ship-time, so set your watches."
                         )
                     )
 

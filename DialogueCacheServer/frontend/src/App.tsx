@@ -243,7 +243,7 @@ const App = observer(({ datastore }: { datastore: DataStore }) => {
               </Typography>
               <Divider variant="middle" />
               <Typography style={{ padding: "10px" }}>
-                I believe we are at the dawn of a new age in AI.  Large forward models, such as Large Langauge Models, are going to revolutionize how tomorrow's generation works and plays.  The text adventure you are about to play blends the latest AI with a human touch to tell a story about tragedy and friendship.  The Essex was a flawed game, but it captured my heart.  I hope The Fortuna will capture yours.
+                I believe we are at the dawn of a new age in AI.  Large forward models, such as Large Language Models, are going to revolutionize how tomorrow's generation works and plays.  The text adventure you are about to play blends the latest AI with a human touch to tell a story about tragedy and friendship.  The Essex was a flawed game, but it captured my heart.  I hope The Fortuna will capture yours.
               </Typography>
             </Paper>
           </Container>
