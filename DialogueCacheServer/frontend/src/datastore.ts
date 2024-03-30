@@ -6,7 +6,7 @@ import fetchPlus from "./FetchPlus";
 
 export var API_SERVER_BASE: string = "/";
 if (window.location.hostname.endsWith("amazonaws.com")) {
-  API_SERVER_BASE = "https://90rjg2sbkg.execute-api.us-east-1.amazonaws.com/dev/";
+  API_SERVER_BASE = "https://qk4ai28m45.execute-api.us-east-1.amazonaws.com/dev/";
 }
 
 export interface GptifAlert {

@@ -78,6 +78,17 @@ def handle_input(world: World, command: str) -> bool:
 
         verb = command.split(" ")[0].upper()
 
+        if verb in ("L", "X", "EXAMINE"):
+            verb = "LOOK"
+
+        if verb in ("I", "INVENTORY"):
+            console.print("I'm carrying a sense of pride and wonder.")
+            return True
+
+        if verb in ("SHOW",):
+            console.print("'Show' is not a supported verb in The Fortuna.")
+            return True
+
         if verb == "GOAL":
             world.print_goal()
             return True
@@ -137,11 +148,18 @@ def handle_input(world: World, command: str) -> bool:
         elif "37" in verb_classes:  # Tell/Ask
             # Handle speaking
             num_quotes = command_minus_verb.count('"')
-            if num_quotes != 2:
+            if num_quotes == 0:
                 console.warning(
                     f'When speaking, you must wrap your text in double-quotes.  For example: TELL JUAN "Hello!"'
                 )
                 return True
+            if num_quotes > 2:
+                console.warning(
+                    f"Nested quotes are not supported.  Please keep the number of quote symbols down to 2."
+                )
+                return True
+            if num_quotes == 1:
+                command_minus_verb = command_minus_verb + '"'
             target_name = (
                 command_minus_verb[: command_minus_verb.find('"')]
                 .strip()
